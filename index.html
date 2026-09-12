@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nimbly Pod — HR Digital System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ SPROUT BACKDROP (decorative, aria-hidden) ============ -->
+<svg class="sprout-mark" aria-hidden="true" viewBox="0 0 200 200" width="0" height="0">
+  <path id="sprout-path" d="M100 190 L100 110 C100 110 60 110 55 70 C90 70 100 100 100 100 C100 100 110 50 150 45 C150 90 120 110 100 110" />
+</svg>
+
+<!-- ============================ AUTH ============================ -->
+<div id="auth-screen" class="auth-screen">
+
+  <div class="auth-side">
+    <div class="auth-side-inner">
+      <div class="brand-mark">
+        <span class="brand-leaf">&#127807;</span>
+        <span class="brand-word">Nimbly&nbsp;Pod</span>
+      </div>
+      <h1 class="auth-tagline">Growing people.<br>Strengthening organizations.</h1>
+      <p class="auth-sub">Every request, record, and review your HR team touches &mdash; one pod, one source of truth.</p>
+      <ul class="auth-points">
+        <li><span>01</span>Requests routed to the right person, automatically</li>
+        <li><span>02</span>Cases, appointments &amp; approvals tracked end to end</li>
+        <li><span>03</span>Analytics that turn headcount data into decisions</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="auth-forms">
+
+    <!-- LOGIN -->
+    <div class="auth-panel" id="panel-login">
+      <div class="auth-panel-head">
+        <h2>Welcome back</h2>
+        <p>Sign in to your HR pod.</p>
+      </div>
+      <form id="login-form" class="auth-form" autocomplete="off">
+        <label class="field">
+          <span>Employee ID or company email</span>
+          <input type="text" id="login-id" placeholder="j.delacruz@nimblypod.com" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <div class="pw-wrap">
+            <input type="password" id="login-pw" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
+            <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password">Show</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Sign in as (demo role)</span>
+          <select id="login-role">
+            <option value="employee">Employee &mdash; Juno Dela Cruz</option>
+            <option value="hr">HR Staff &mdash; Marisol Reyes</option>
+            <option value="hrhead">HR Head &mdash; Bien Santos</option>
+            <option value="admin">Administrator &mdash; Admin Root</option>
+          </select>
+        </label>
+
+        <div class="auth-row">
+          <label class="remember">
+            <input type="checkbox" id="login-remember" />
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="link-muted">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+      <p class="auth-switch">New to Nimbly Pod? <a href="#" id="show-register">Create an account</a></p>
+    </div>
+
+    <!-- REGISTER (3 step) -->
+    <div class="auth-panel hidden" id="panel-register">
+      <div class="auth-panel-head">
+        <h2>Create your account</h2>
+        <p>It takes three short steps.</p>
+      </div>
+
+      <ol class="step-track" id="reg-steps">
+        <li class="active" data-step="1"><span class="step-dot">1</span>Personal info</li>
+        <li data-step="2"><span class="step-dot">2</span>Account security</li>
+        <li data-step="3"><span class="step-dot">3</span>Confirmation</li>
+      </ol>
+
+      <form id="register-form" class="auth-form" autocomplete="off">
+
+        <div class="reg-step active" data-step="1">
+          <label class="field">
+            <span>Full name</span>
+            <input type="text" id="reg-name" placeholder="Juno Dela Cruz" required />
+          </label>
+          <label class="field">
+            <span>Department</span>
+            <select id="reg-dept">
+              <option>Operations</option>
+              <option>Customer Support</option>
+              <option>Workforce Management</option>
+              <option>IT &amp; Systems</option>
+              <option>Human Resources</option>
+              <option>Finance</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Company email</span>
+            <input type="email" id="reg-email" placeholder="you@nimblypod.com" required />
+          </label>
+          <button type="button" class="btn btn-primary btn-block" data-next="2">Continue</button>
+        </div>
+
+        <div class="reg-step" data-step="2">
+          <label class="field">
+            <span>Employee ID</span>
+            <input type="text" id="reg-empid" placeholder="NP-2026-0148" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input type="password" id="reg-pw" placeholder="Create a password" required />
+          </label>
+          <label class="field">
+            <span>Confirm password</span>
+            <input type="password" id="reg-pw2" placeholder="Re-enter password" required />
+          </label>
+          <div class="auth-row auth-row-split">
+            <button type="button" class="btn btn-ghost" data-back="1">Back</button>
+            <button type="button" class="btn btn-primary" data-next="3">Continue</button>
+          </div>
+        </div>
+
+        <div class="reg-step" data-step="3">
+          <div class="confirm-box">
+            <p class="confirm-title">Almost there</p>
+            <dl id="confirm-summary" class="confirm-summary"></dl>
+          </div>
+          <div class="auth-row auth-row-split">
+            <button type="button" class="btn btn-ghost" data-back="2">Back</button>
+            <button type="submit" class="btn btn-primary">Create account</button>
+          </div>
+        </div>
+
+      </form>
+      <p class="auth-switch">Already registered? <a href="#" id="show-login">Sign in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================ APP SHELL ============================ -->
+<div id="app-shell" class="app-shell hidden">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-leaf">&#127807;</span>
+      <span class="brand-word">Nimbly&nbsp;Pod</span>
+    </div>
+
+    <nav class="side-nav">
+      <p class="side-group-label">Main</p>
+      <ul id="nav-main"></ul>
+
+      <p class="side-group-label" id="hr-group-label">HR &amp; Admin</p>
+      <ul id="nav-hr"></ul>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <ul>
+        <li><button class="nav-item" data-view="help"><i data-ic="help"></i>Help</button></li>
+        <li><button class="nav-item" id="logout-btn"><i data-ic="logout"></i>Log out</button></li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="main-col">
+
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">&#9776;</button>
+      <div class="topbar-title">
+        <h1 id="view-title">Dashboard</h1>
+        <p id="view-subtitle">Welcome back to your pod.</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notif-btn" title="Notifications">
+          &#128276;<span class="dot" id="notif-dot"></span>
+        </button>
+        <button class="btn btn-primary btn-sm" id="new-request-btn">+ New request</button>
+        <div class="user-chip" id="user-chip">
+          <div class="avatar" id="user-avatar">JD</div>
+          <div class="user-chip-text">
+            <strong id="user-name">Juno Dela Cruz</strong>
+            <span id="user-role">Employee</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- ---------------- DASHBOARD ---------------- -->
+      <section class="view" id="view-dashboard">
+        <div class="welcome-banner">
+          <div class="welcome-copy">
+            <p class="eyebrow-free">Nimbly Pod</p>
+            <h2>Growing people. Strengthening organizations.</h2>
+            <p class="welcome-msg">Everything your HR journey touches &mdash; requests, cases, learning, people &mdash; lives here now, in one place.</p>
+            <div class="welcome-pills">
+              <span><strong>Mission</strong> Make HR effortless, humane, and fast for every BPO teammate.</span>
+              <span><strong>Vision</strong> One pod that grows with every employee's career.</span>
+              <span><strong>Priority</strong> Cut request turnaround time by half this quarter.</span>
+            </div>
+          </div>
+          <svg class="welcome-art" viewBox="0 0 240 200" aria-hidden="true">
+            <use href="#sprout-path" x="20" y="0" transform="scale(0.9)"></use>
+          </svg>
+        </div>
+
+        <div class="kpi-row" id="dash-kpis"></div>
+
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-head"><h3>CEO announcement</h3></div>
+            <div id="dash-ceo" class="ceo-note"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Recent activity</h3></div>
+            <ul class="activity-list" id="dash-activity"></ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Notifications</h3></div>
+            <ul class="notif-list" id="dash-notifs"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- EMPLOYEE DIRECTORY ---------------- -->
+      <section class="view hidden" id="view-directory">
+        <div class="toolbar">
+          <input type="search" id="dir-search" placeholder="Search by name, ID, or department&hellip;" class="search-input" />
+          <select id="dir-filter-dept" class="filter-select"></select>
+          <select id="dir-filter-status" class="filter-select">
+            <option value="">All statuses</option>
+            <option value="Active">Active</option>
+            <option value="On Leave">On Leave</option>
+            <option value="Probationary">Probationary</option>
+          </select>
+          <div class="toolbar-tabs">
+            <button class="tab active" data-dirtab="list">List</button>
+            <button class="tab" data-dirtab="org">Org chart</button>
+          </div>
+        </div>
+
+        <div id="dir-list-wrap" class="panel">
+          <table class="data-table">
+            <thead><tr>
+              <th>Employee</th><th>Employee ID</th><th>Department</th><th>Position</th><th>Supervisor</th><th>Status</th>
+            </tr></thead>
+            <tbody id="dir-table-body"></tbody>
+          </table>
+        </div>
+
+        <div id="dir-org-wrap" class="panel hidden">
+          <div class="org-chart" id="org-chart"></div>
+        </div>
+      </section>
+
+      <!-- ---------------- HR ANALYTICS ---------------- -->
+      <section class="view hidden" id="view-analytics">
+        <div class="kpi-row" id="an-kpis"></div>
+        <div class="chart-grid">
+          <div class="panel">
+            <div class="panel-head"><h3>Headcount by department</h3></div>
+            <canvas id="chart-headcount" height="220"></canvas>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Turnover &amp; retention trend</h3></div>
+            <canvas id="chart-turnover" height="220"></canvas>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Recruitment pipeline mix</h3></div>
+            <canvas id="chart-recruit" height="220"></canvas>
+            <div class="legend" id="chart-recruit-legend"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Training completion</h3></div>
+            <canvas id="chart-training" height="220"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- PERFORMANCE ---------------- -->
+      <section class="view hidden" id="view-performance">
+        <div class="kpi-row" id="perf-kpis"></div>
+        <div class="dash-grid dash-grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Goals &amp; KPIs</h3></div>
+            <div id="perf-goals" class="goal-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Recognition &amp; rewards</h3></div>
+            <ul class="activity-list" id="perf-rewards"></ul>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Evaluation ratings</h3></div>
+          <table class="data-table">
+            <thead><tr><th>Employee</th><th>Cycle</th><th>Rating</th><th>Trend</th></tr></thead>
+            <tbody id="perf-ratings-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------------- TALENT ACQUISITION ---------------- -->
+      <section class="view hidden" id="view-recruitment">
+        <div class="kpi-row" id="rec-kpis"></div>
+        <div class="panel">
+          <div class="panel-head"><h3>Open vacancies</h3></div>
+          <table class="data-table">
+            <thead><tr><th>Position</th><th>Department</th><th>Openings</th><th>Applicants</th><th>Target date</th></tr></thead>
+            <tbody id="rec-vacancies-body"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Pipeline board</h3><p class="panel-sub">Click &ldquo;Advance&rdquo; to move a candidate to the next stage.</p></div>
+          <div class="kanban" id="rec-kanban"></div>
+        </div>
+      </section>
+
+      <!-- ---------------- LEARNING & DEVELOPMENT ---------------- -->
+      <section class="view hidden" id="view-learning">
+        <div class="toolbar-tabs" id="learn-tabs">
+          <button class="tab active" data-learntab="employee">Employee view</button>
+          <button class="tab" data-learntab="hr">HR view</button>
+        </div>
+
+        <div id="learn-employee">
+          <div class="dash-grid dash-grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Upcoming training</h3></div>
+              <ul class="activity-list" id="learn-upcoming"></ul>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Assigned courses</h3></div>
+              <div id="learn-assigned" class="goal-list"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Completed &amp; certifications</h3></div>
+            <table class="data-table">
+              <thead><tr><th>Course / certification</th><th>Completed</th><th>Score</th><th>Status</th></tr></thead>
+              <tbody id="learn-completed-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="learn-hr" class="hidden">
+          <div class="kpi-row" id="learn-hr-kpis"></div>
+          <div class="panel">
+            <div class="panel-head"><h3>Training calendar</h3></div>
+            <table class="data-table">
+              <thead><tr><th>Session</th><th>Facilitator</th><th>Date</th><th>Attendance</th><th>Completion</th></tr></thead>
+              <tbody id="learn-calendar-body"></tbody>
+            </table>
+          </div>
+          <div class="dash-grid dash-grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Competency gaps</h3></div>
+              <div id="learn-gaps" class="goal-list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Succession planning</h3></div>
+              <ul class="activity-list" id="learn-succession"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- ANNOUNCEMENTS ---------------- -->
+      <section class="view hidden" id="view-announcements">
+        <div class="toolbar">
+          <div class="chip-filters" id="ann-filters"></div>
+          <button class="btn btn-primary btn-sm hr-only" id="ann-new-btn">+ New announcement</button>
+        </div>
+        <div class="card-grid" id="ann-grid"></div>
+      </section>
+
+      <!-- ---------------- APPOINTMENTS ---------------- -->
+      <section class="view hidden" id="view-appointments">
+        <div class="toolbar">
+          <select id="appt-filter-status" class="filter-select">
+            <option value="">All statuses</option>
+            <option>Scheduled</option><option>Ongoing</option><option>Completed</option><option>Cancelled</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="appt-new-btn">+ Book appointment</button>
+        </div>
+        <div class="panel">
+          <table class="data-table">
+            <thead><tr><th>Employee</th><th>HR representative</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+            <tbody id="appt-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------------- CASE BOARD ---------------- -->
+      <section class="view hidden" id="view-cases">
+        <div class="toolbar">
+          <input type="search" id="case-search" placeholder="Search case number or employee&hellip;" class="search-input" />
+          <button class="btn btn-primary btn-sm" id="case-new-btn">+ File a case</button>
+        </div>
+        <div class="kanban kanban-4" id="case-kanban"></div>
+      </section>
+
+      <!-- ---------------- MY PROFILE ---------------- -->
+      <section class="view hidden" id="view-profile">
+        <div class="profile-head panel">
+          <div class="avatar avatar-lg" id="profile-avatar">JD</div>
+          <div>
+            <h2 id="profile-name">Juno Dela Cruz</h2>
+            <p id="profile-role-line">Customer Support &middot; Team Lead</p>
+            <span class="badge badge-green" id="profile-status">Active</span>
+          </div>
+          <button class="btn btn-ghost" id="profile-edit-btn">Edit profile</button>
+        </div>
+        <div class="dash-grid dash-grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Employment details</h3></div>
+            <dl class="detail-list" id="profile-details"></dl>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Documents</h3></div>
+            <ul class="activity-list" id="profile-docs"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- BACKUP & RECOVERY ---------------- -->
+      <section class="view hidden" id="view-backup">
+        <div class="panel backup-status">
+          <div>
+            <p class="panel-sub">Last successful backup</p>
+            <h2 id="backup-last">Today, 4:00 AM</h2>
+          </div>
+          <div class="backup-actions">
+            <button class="btn btn-ghost btn-sm" id="btn-sync">Sync now</button>
+            <button class="btn btn-ghost btn-sm" id="btn-backup">Backup now</button>
+            <button class="btn btn-ghost btn-sm" id="btn-restore">Restore data</button>
+            <button class="btn btn-primary btn-sm" id="btn-download">Download backup</button>
+          </div>
+        </div>
+        <div class="dash-grid dash-grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Backup history</h3></div>
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Type</th><th>Size</th><th>Status</th></tr></thead>
+              <tbody id="backup-history-body"></tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>System &amp; administrator logs</h3></div>
+            <ul class="activity-list" id="backup-logs"></ul>
+          </div>
+        </div>
+        <p class="panel-note">Connect a Google account to enable automatic Google Sheets syncing for records and backups.</p>
+      </section>
+
+      <!-- ---------------- SETTINGS ---------------- -->
+      <section class="view hidden" id="view-settings">
+        <div class="panel">
+          <div class="panel-head"><h3>Notifications</h3></div>
+          <div class="toggle-row"><span>Email me about request updates</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="toggle-row"><span>Remind me before appointments</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="toggle-row"><span>Weekly analytics digest</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Account</h3></div>
+          <label class="field"><span>Display name</span><input type="text" id="settings-name" /></label>
+          <label class="field"><span>Company email</span><input type="email" id="settings-email" /></label>
+          <button class="btn btn-primary btn-sm" id="settings-save">Save changes</button>
+        </div>
+      </section>
+
+      <!-- ---------------- HELP ---------------- -->
+      <section class="view hidden" id="view-help">
+        <div class="panel">
+          <div class="panel-head"><h3>Need a hand?</h3></div>
+          <p>Reach the HR helpdesk at <strong>helpdesk@nimblypod.com</strong> or file a request using the button in the top bar &mdash; most requests get a first response within one business day.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================ MODALS ============================ -->
+<div class="modal-overlay hidden" id="modal-overlay">
+
+  <div class="modal" id="modal-request">
+    <div class="modal-head"><h3>New HR request</h3><button class="modal-close" data-close>&times;</button></div>
+    <form class="modal-body" id="request-form">
+      <label class="field"><span>Request type</span>
+        <select id="req-type">
+          <option>Leave application</option>
+          <option>Certificate of employment</option>
+          <option>Payroll concern</option>
+          <option>Equipment request</option>
+          <option>Schedule change</option>
+          <option>Policy clarification</option>
+        </select>
+      </label>
+      <label class="field"><span>Details</span><textarea id="req-details" rows="4" placeholder="Tell HR what you need&hellip;"></textarea></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">Submit request</button></div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-appointment">
+    <div class="modal-head"><h3>Book an HR appointment</h3><button class="modal-close" data-close>&times;</button></div>
+    <form class="modal-body" id="appointment-form">
+      <label class="field"><span>HR representative</span>
+        <select id="appt-hr">
+          <option>Marisol Reyes</option><option>Bien Santos</option><option>Kyle Fernandez</option>
+        </select>
+      </label>
+      <div class="field-row">
+        <label class="field"><span>Date</span><input type="date" id="appt-date" required /></label>
+        <label class="field"><span>Time</span><input type="time" id="appt-time" required /></label>
+      </div>
+      <label class="field"><span>Reason</span><input type="text" id="appt-reason" placeholder="e.g. Benefits consultation" required /></label>
+      <label class="field"><span>Notes (optional)</span><textarea id="appt-notes" rows="3"></textarea></label>
+      <p class="panel-note">Calendar &amp; video call links can sync here once Google Calendar / Meet are connected.</p>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">Book appointment</button></div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-case">
+    <div class="modal-head"><h3 id="case-modal-title">Case detail</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body" id="case-modal-body"></div>
+  </div>
+
+  <div class="modal" id="modal-case-new">
+    <div class="modal-head"><h3>File a case</h3><button class="modal-close" data-close>&times;</button></div>
+    <form class="modal-body" id="case-new-form">
+      <label class="field"><span>Category</span>
+        <select id="case-category">
+          <option>Workplace conduct</option><option>Attendance</option><option>Compensation dispute</option><option>Harassment concern</option><option>Policy violation</option><option>Well-being check-in</option>
+        </select>
+      </label>
+      <label class="field"><span>Priority</span>
+        <select id="case-priority"><option>Low</option><option selected>Medium</option><option>High</option></select>
+      </label>
+      <label class="field"><span>Description</span><textarea id="case-desc" rows="4" required></textarea></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">File case</button></div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-announcement">
+    <div class="modal-head"><h3 id="ann-modal-title">Announcement</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body" id="ann-modal-body"></div>
+  </div>
+
+  <div class="modal" id="modal-ann-new">
+    <div class="modal-head"><h3>New announcement</h3><button class="modal-close" data-close>&times;</button></div>
+    <form class="modal-body" id="ann-new-form">
+      <label class="field"><span>Title</span><input type="text" id="ann-title" required /></label>
+      <label class="field"><span>Category</span>
+        <select id="ann-category"><option>Company</option><option>HR</option><option>Training</option><option>Policy</option><option>Events</option><option>Emergency</option></select>
+      </label>
+      <label class="field"><span>Priority</span><select id="ann-priority"><option>Normal</option><option>High</option></select></label>
+      <label class="field"><span>Description</span><textarea id="ann-desc" rows="4" required></textarea></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">Post announcement</button></div>
+    </form>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
