@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nimbly Pod — HR Digital System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Modak&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,6 +21,7 @@
   <div class="auth-side">
     <div class="auth-side-inner">
       <div class="brand-mark">
+        <img class="logo-img" data-logo alt="Nimbly Pod logo" />
         <span class="brand-leaf">&#127807;</span>
         <span class="brand-word">Nimbly&nbsp;Pod</span>
       </div>
@@ -44,8 +45,8 @@
       </div>
       <form id="login-form" class="auth-form" autocomplete="off">
         <label class="field">
-          <span>Employee ID or company email</span>
-          <input type="text" id="login-id" placeholder="j.delacruz@nimblypod.com" required />
+          <span>Company email</span>
+          <input type="email" id="login-id" placeholder="j.delacruz@nimblypod.com" required />
         </label>
         <label class="field">
           <span>Password</span>
@@ -158,6 +159,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
+      <img class="logo-img" data-logo alt="Nimbly Pod logo" />
       <span class="brand-leaf">&#127807;</span>
       <span class="brand-word">Nimbly&nbsp;Pod</span>
     </div>
@@ -207,18 +209,22 @@
       <section class="view" id="view-dashboard">
         <div class="welcome-banner">
           <div class="welcome-copy">
-            <p class="eyebrow-free">Nimbly Pod</p>
+            <p class="eyebrow-free"><img class="welcome-logo" data-logo alt="Nimbly Pod logo" />Nimbly Pod</p>
             <h2>Growing people. Strengthening organizations.</h2>
             <p class="welcome-msg">Everything your HR journey touches &mdash; requests, cases, learning, people &mdash; lives here now, in one place.</p>
-            <div class="welcome-pills">
-              <span><strong>Mission</strong> Make HR effortless, humane, and fast for every BPO teammate.</span>
-              <span><strong>Vision</strong> One pod that grows with every employee's career.</span>
-              <span><strong>Priority</strong> Cut request turnaround time by half this quarter.</span>
+            <div class="vm-grid">
+              <div class="vm-box"><strong>Vision</strong><p>To become an exceptional company in providing efficient services and a workplace that prioritizes its employees, encouraging them to grow alongside the company and beyond.</p></div>
+              <div class="vm-box"><strong>Mission</strong><p>To bridge global businesses with agile, high-performing remote talent through cloud-driven efficiency, autonomous pod structures, and seamless workforce solutions.</p></div>
             </div>
           </div>
           <svg class="welcome-art" viewBox="0 0 240 200" aria-hidden="true">
             <use href="#sprout-path" x="20" y="0" transform="scale(0.9)"></use>
           </svg>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Five current strategic priorities</h3></div>
+          <div class="priority-grid" id="dash-priorities"></div>
         </div>
 
         <div class="kpi-row" id="dash-kpis"></div>
@@ -227,6 +233,7 @@
           <div class="panel">
             <div class="panel-head"><h3>CEO announcement</h3></div>
             <div id="dash-ceo" class="ceo-note"></div>
+            <div class="contact-note" id="dash-contact"></div>
           </div>
           <div class="panel">
             <div class="panel-head"><h3>Recent activity</h3></div>
@@ -239,34 +246,58 @@
         </div>
       </section>
 
-      <!-- ---------------- EMPLOYEE DIRECTORY ---------------- -->
-      <section class="view hidden" id="view-directory">
-        <div class="toolbar">
-          <input type="search" id="dir-search" placeholder="Search by name, ID, or department&hellip;" class="search-input" />
-          <select id="dir-filter-dept" class="filter-select"></select>
-          <select id="dir-filter-status" class="filter-select">
-            <option value="">All statuses</option>
-            <option value="Active">Active</option>
-            <option value="On Leave">On Leave</option>
-            <option value="Probationary">Probationary</option>
-          </select>
-          <div class="toolbar-tabs">
-            <button class="tab active" data-dirtab="list">List</button>
-            <button class="tab" data-dirtab="org">Org chart</button>
-          </div>
+      <!-- ---------------- ORGANIZATION ---------------- -->
+      <section class="view hidden" id="view-organization">
+        <div class="subtab-bar" id="org-subtabs">
+          <button class="tab active" data-orgtab="orgchart">Organizational Chart</button>
+          <button class="tab" data-orgtab="reporting">Reporting Relationships</button>
+          <button class="tab" data-orgtab="deptdir">Department Directory</button>
+          <button class="tab" data-orgtab="employeedir">Employee Directory</button>
+          <button class="tab" data-orgtab="positions">Job Positions</button>
         </div>
 
-        <div id="dir-list-wrap" class="panel">
+        <div id="org-orgchart" class="panel">
+          <div class="org-chart" id="org-chart"></div>
+        </div>
+
+        <div id="org-reporting" class="panel hidden">
           <table class="data-table">
-            <thead><tr>
-              <th>Employee</th><th>Employee ID</th><th>Department</th><th>Position</th><th>Supervisor</th><th>Status</th>
-            </tr></thead>
-            <tbody id="dir-table-body"></tbody>
+            <thead><tr><th>Employee</th><th>Position</th><th>Reports to</th></tr></thead>
+            <tbody id="org-reporting-body"></tbody>
           </table>
         </div>
 
-        <div id="dir-org-wrap" class="panel hidden">
-          <div class="org-chart" id="org-chart"></div>
+        <div id="org-deptdir" class="panel hidden">
+          <table class="data-table">
+            <thead><tr><th>Department</th><th>Primary responsibility</th></tr></thead>
+            <tbody id="org-deptdir-body"></tbody>
+          </table>
+        </div>
+
+        <div id="org-employeedir" class="hidden">
+          <div class="toolbar">
+            <input type="search" id="dir-search" placeholder="Search by name, ID, or department&hellip;" class="search-input" />
+            <select id="dir-filter-dept" class="filter-select"></select>
+            <select id="dir-filter-status" class="filter-select">
+              <option value="">All statuses</option>
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Probationary">Probationary</option>
+            </select>
+            <a class="btn btn-ghost btn-sm" id="dir-sheet-link" href="#" target="_blank" rel="noopener">Open in Google Sheets</a>
+          </div>
+          <div class="panel">
+            <table class="data-table">
+              <thead><tr>
+                <th>Employee</th><th>Employee ID</th><th>Department</th><th>Position</th><th>Supervisor</th><th>Status</th>
+              </tr></thead>
+              <tbody id="dir-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="org-positions" class="panel hidden">
+          <div class="role-list" id="org-positions-list"></div>
         </div>
       </section>
 
@@ -316,19 +347,38 @@
         </div>
       </section>
 
-      <!-- ---------------- TALENT ACQUISITION ---------------- -->
+      <!-- ---------------- TALENT ACQUISITION / WORKFORCE PLANNING ---------------- -->
       <section class="view hidden" id="view-recruitment">
-        <div class="kpi-row" id="rec-kpis"></div>
-        <div class="panel">
-          <div class="panel-head"><h3>Open vacancies</h3></div>
-          <table class="data-table">
-            <thead><tr><th>Position</th><th>Department</th><th>Openings</th><th>Applicants</th><th>Target date</th></tr></thead>
-            <tbody id="rec-vacancies-body"></tbody>
-          </table>
+        <div class="subtab-bar" id="rec-subtabs">
+          <button class="tab active" data-rectab="talent">Talent Acquisition</button>
+          <button class="tab" data-rectab="workforce">Workforce Planning</button>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3>Pipeline board</h3><p class="panel-sub">Click &ldquo;Advance&rdquo; to move a candidate to the next stage.</p></div>
-          <div class="kanban" id="rec-kanban"></div>
+
+        <div id="rec-talent">
+          <div class="kpi-row" id="rec-kpis"></div>
+          <div class="contact-note" id="rec-contact"></div>
+          <div class="panel">
+            <div class="panel-head"><h3>Open vacancies</h3></div>
+            <table class="data-table">
+              <thead><tr><th>Position</th><th>Department</th><th>Openings</th><th>Applicants</th><th>Target date</th></tr></thead>
+              <tbody id="rec-vacancies-body"></tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Pipeline board</h3><p class="panel-sub">Click &ldquo;Advance&rdquo; to move a candidate to the next stage.</p></div>
+            <div class="kanban" id="rec-kanban"></div>
+          </div>
+        </div>
+
+        <div id="rec-workforce" class="hidden">
+          <div class="panel">
+            <div class="panel-head"><h3>Workforce planning metrics</h3></div>
+            <table class="data-table">
+              <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+              <tbody id="rec-workforce-body"></tbody>
+            </table>
+            <p class="panel-note" style="margin-top:14px;">Data given are for demonstration purposes only and are not based on actual benchmarks.</p>
+          </div>
         </div>
       </section>
 
@@ -395,25 +445,84 @@
         <div class="toolbar">
           <select id="appt-filter-status" class="filter-select">
             <option value="">All statuses</option>
-            <option>Scheduled</option><option>Ongoing</option><option>Completed</option><option>Cancelled</option>
+            <option>Pending Review</option><option>Accepted</option><option>Rescheduled</option><option>Declined</option><option>Completed</option><option>Cancelled</option>
           </select>
+          <div class="toolbar-tabs">
+            <button class="tab active" data-appttab="list">List</button>
+            <button class="tab" data-appttab="calendar">Calendar</button>
+          </div>
           <button class="btn btn-primary btn-sm" id="appt-new-btn">+ Book appointment</button>
         </div>
-        <div class="panel">
+
+        <div id="appt-list-wrap" class="panel">
           <table class="data-table">
-            <thead><tr><th>Employee</th><th>HR representative</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Employee</th><th>HR representative</th><th>Type</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr></thead>
             <tbody id="appt-table-body"></tbody>
           </table>
+        </div>
+
+        <div id="appt-cal-wrap" class="panel hidden">
+          <div class="cal-head"><h3 id="cal-month-label">September 2026</h3></div>
+          <div class="cal-grid" id="cal-grid"></div>
         </div>
       </section>
 
       <!-- ---------------- CASE BOARD ---------------- -->
       <section class="view hidden" id="view-cases">
+        <div class="panel">
+          <div class="panel-head"><h3>How a case moves through the pod</h3></div>
+          <div class="step-flow" id="case-process-flow"></div>
+        </div>
         <div class="toolbar">
           <input type="search" id="case-search" placeholder="Search case number or employee&hellip;" class="search-input" />
           <button class="btn btn-primary btn-sm" id="case-new-btn">+ File a case</button>
         </div>
         <div class="kanban kanban-4" id="case-kanban"></div>
+      </section>
+
+      <!-- ---------------- EMPLOYEE WELL-BEING ---------------- -->
+      <section class="view hidden" id="view-wellbeing">
+        <div class="subtab-bar" id="wb-subtabs">
+          <button class="tab active" data-wbtab="procedures">Relations Procedures</button>
+          <button class="tab" data-wbtab="grievance">File a Grievance</button>
+          <button class="tab" data-wbtab="conflict">Conflict Management</button>
+          <button class="tab" data-wbtab="wellbeing">Well-being Initiatives</button>
+          <button class="tab" data-wbtab="engagement">Employee Engagement</button>
+        </div>
+
+        <div id="wb-procedures" class="panel wellbeing-panel">
+          <div class="panel-head"><h3>Employee Relations Procedures</h3></div>
+          <p class="panel-note">View how HR handles employee concerns, from intake to resolution.</p>
+          <ul class="plain-list" id="wb-procedures-list"></ul>
+        </div>
+
+        <div id="wb-grievance" class="panel wellbeing-panel hidden">
+          <div class="panel-head"><h3>File a Grievance</h3></div>
+          <p class="panel-note">Submit a workplace complaint or concern. It will appear on the Case Board and be routed to HR.</p>
+          <button class="btn btn-primary btn-sm" id="wb-grievance-btn">File a grievance</button>
+        </div>
+
+        <div id="wb-conflict" class="panel wellbeing-panel hidden">
+          <div class="panel-head"><h3>Conflict Management</h3></div>
+          <p class="panel-note">Request HR assistance, mediation, or intervention for a workplace conflict.</p>
+          <button class="btn btn-primary btn-sm" id="wb-conflict-btn">Request mediation</button>
+        </div>
+
+        <div id="wb-wellbeing" class="panel wellbeing-panel hidden">
+          <div class="panel-head"><h3>Well-being Initiatives</h3></div>
+          <p class="panel-note">Explore the Well-being Hub or request support directly from HR.</p>
+          <ul class="plain-list" id="wb-initiatives-list"></ul>
+          <button class="btn btn-primary btn-sm" id="wb-wellbeing-btn">Request well-being support</button>
+        </div>
+
+        <div id="wb-engagement" class="panel wellbeing-panel hidden">
+          <div class="panel-head"><h3>Employee Engagement</h3></div>
+          <p class="panel-note">Submit feedback, suggestions, or concerns about your team or workplace experience.</p>
+          <form id="engagement-form">
+            <label class="field"><span>Your feedback</span><textarea id="engagement-text" rows="4" placeholder="Share what's on your mind&hellip;" required></textarea></label>
+            <button type="submit" class="btn btn-primary btn-sm">Submit feedback</button>
+          </form>
+        </div>
       </section>
 
       <!-- ---------------- MY PROFILE ---------------- -->
@@ -469,6 +578,19 @@
         <p class="panel-note">Connect a Google account to enable automatic Google Sheets syncing for records and backups.</p>
       </section>
 
+      <!-- ---------------- ARCHIVE ---------------- -->
+      <section class="view hidden" id="view-archive">
+        <div class="toolbar">
+          <input type="search" id="archive-search" placeholder="Search documents&hellip;" class="search-input" />
+          <a class="btn btn-ghost btn-sm" id="archive-doc-link" href="#" target="_blank" rel="noopener">Open Google Doc</a>
+          <button class="btn btn-primary btn-sm" id="archive-upload-btn">+ Upload document</button>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Research, policies &amp; evidence</h3><p class="panel-sub">Organized access to research, interviews, reports, and policies used in HR decisions.</p></div>
+          <div id="archive-list"></div>
+        </div>
+      </section>
+
       <!-- ---------------- SETTINGS ---------------- -->
       <section class="view hidden" id="view-settings">
         <div class="panel">
@@ -511,6 +633,7 @@
           <option>Equipment request</option>
           <option>Schedule change</option>
           <option>Policy clarification</option>
+          <option>Well-being support</option>
         </select>
       </label>
       <label class="field"><span>Details</span><textarea id="req-details" rows="4" placeholder="Tell HR what you need&hellip;"></textarea></label>
@@ -526,15 +649,23 @@
           <option>Marisol Reyes</option><option>Bien Santos</option><option>Kyle Fernandez</option>
         </select>
       </label>
+      <label class="field"><span>Appointment type</span>
+        <select id="appt-type"><option>Face-to-face</option><option>Online</option></select>
+      </label>
       <div class="field-row">
         <label class="field"><span>Date</span><input type="date" id="appt-date" required /></label>
         <label class="field"><span>Time</span><input type="time" id="appt-time" required /></label>
       </div>
       <label class="field"><span>Reason</span><input type="text" id="appt-reason" placeholder="e.g. Benefits consultation" required /></label>
       <label class="field"><span>Notes (optional)</span><textarea id="appt-notes" rows="3"></textarea></label>
-      <p class="panel-note">Calendar &amp; video call links can sync here once Google Calendar / Meet are connected.</p>
+      <p class="panel-note">Your request goes to HR for review, who may Accept, Reschedule, or Decline it. Calendar &amp; video call links can sync here once Google Calendar / Meet are connected.</p>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">Book appointment</button></div>
     </form>
+  </div>
+
+  <div class="modal" id="modal-appt-detail">
+    <div class="modal-head"><h3 id="appt-modal-title">Appointment detail</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body" id="appt-modal-body"></div>
   </div>
 
   <div class="modal" id="modal-case">
@@ -547,7 +678,7 @@
     <form class="modal-body" id="case-new-form">
       <label class="field"><span>Category</span>
         <select id="case-category">
-          <option>Workplace conduct</option><option>Attendance</option><option>Compensation dispute</option><option>Harassment concern</option><option>Policy violation</option><option>Well-being check-in</option>
+          <option>Grievance</option><option>Workplace conduct</option><option>Attendance</option><option>Compensation dispute</option><option>Harassment concern</option><option>Policy violation</option><option>Well-being check-in</option>
         </select>
       </label>
       <label class="field"><span>Priority</span>

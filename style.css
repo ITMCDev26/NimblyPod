@@ -2,30 +2,31 @@
    NIMBLY POD — design tokens
    ============================================================ */
 :root{
-  --primary:      #1F6B45;
-  --secondary:    #2F8B5B;
-  --light-green:  #EAF5EE;
-  --bg:           #F4FAF6;
+  --primary:      #17382A;   /* Dark Green — main brand color */
+  --secondary:    #0F162A;   /* Dark Blue — secondary elements */
+  --light-green:  #DBF6E8;   /* Light Green — backgrounds & highlights */
+  --bg:           #F5FBF8;
   --dark-green:   #17382A;
 
-  --ink:          #16241D;
-  --ink-soft:     #4B5E54;
-  --line:         #D9E8DD;
+  --ink:          #101A15;
+  --ink-soft:     #536860;
+  --line:         #CCEBDC;
   --white:        #FFFFFF;
 
-  --amber:        #B4791F;
-  --amber-bg:     #FBF0DE;
+  --amber:        #9A6B00;
+  --amber-bg:     #FCEFC7;
   --red:          #A73B3B;
   --red-bg:       #FBEAEA;
-  --blue:         #2A5C8A;
-  --blue-bg:      #E8F0F8;
+  --blue:         #0F162A;
+  --blue-bg:      #E4E7F0;
 
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
 
-  --shadow: 0 1px 2px rgba(23,56,42,.06), 0 8px 24px -12px rgba(23,56,42,.18);
+  --shadow: 0 1px 2px rgba(15,22,42,.06), 0 8px 24px -12px rgba(15,22,42,.2);
 
+  --font-logo: "Modak", "Fraunces", Georgia, serif;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
@@ -34,8 +35,10 @@
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+html{ overflow-x:hidden; }
 body{
   margin:0;
+  overflow-x:hidden;
   font-family:var(--font-body);
   background:var(--bg);
   color:var(--ink);
@@ -105,7 +108,7 @@ textarea{ resize:vertical; }
 .auth-side{
   background:
     radial-gradient(circle at 15% 20%, rgba(255,255,255,.08), transparent 40%),
-    linear-gradient(155deg, var(--dark-green) 0%, #1c4a34 55%, var(--primary) 100%);
+    linear-gradient(155deg, var(--dark-green) 0%, #16301f 45%, var(--secondary) 100%);
   color:#fff;
   display:flex; align-items:center;
   padding:48px;
@@ -229,7 +232,7 @@ textarea{ resize:vertical; }
    WELCOME BANNER / KPI / PANELS
    ============================================================ */
 .welcome-banner{
-  background:linear-gradient(120deg, var(--dark-green), var(--primary) 78%);
+  background:linear-gradient(120deg, var(--dark-green) 0%, #163823 45%, var(--secondary) 100%);
   border-radius:var(--radius-lg);
   color:#fff;
   padding:34px 38px;
@@ -328,8 +331,9 @@ textarea{ resize:vertical; }
 /* ============================================================
    CHARTS / LEGEND
    ============================================================ */
-.chart-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-canvas{ width:100%; display:block; }
+.chart-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; min-width:0; }
+.chart-grid .panel{ min-width:0; overflow:hidden; }
+canvas{ width:100%; max-width:100%; display:block; }
 .legend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; }
 .legend span{ font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px; }
 .legend i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
@@ -470,6 +474,89 @@ i[data-ic="relations"]::before{ content:"\1F91D"; }
 i[data-ic="ops"]::before{ content:"\2699"; }
 i[data-ic="users"]::before{ content:"\1F510"; }
 i[data-ic="org"]::before{ content:"\1F3E2"; }
+i[data-ic="organization"]::before{ content:"\1F3E2"; }
+i[data-ic="wellbeing"]::before{ content:"\1F91D"; }
+i[data-ic="archive"]::before{ content:"\1F5C4"; }
+
+/* ============================================================
+   LOGO (image-based, swappable via CONFIG.logoUrl)
+   ============================================================ */
+.logo-img{ height:30px; width:30px; object-fit:contain; border-radius:7px; flex:none; display:none; }
+.logo-img.loaded{ display:inline-block; }
+.brand-mark .brand-leaf, .sidebar-brand .brand-leaf{ display:inline-block; }
+.brand-mark .logo-img.loaded + .brand-leaf, .sidebar-brand .logo-img.loaded + .brand-leaf{ display:none; }
+.welcome-logo{ height:34px; width:34px; object-fit:contain; border-radius:8px; display:none; margin-right:10px; vertical-align:middle; }
+.welcome-logo.loaded{ display:inline-block; }
+.brand-word{ font-family:var(--font-logo); font-weight:400; letter-spacing:.01em; }
+
+/* ============================================================
+   STRATEGIC PRIORITIES
+   ============================================================ */
+.priority-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:14px; }
+.priority-card{ background:var(--light-green); border-radius:12px; padding:15px 16px; border-left:3px solid var(--secondary); }
+.priority-card .priority-num{ font-family:var(--font-display); font-size:12.5px; font-weight:700; color:var(--secondary); margin-bottom:6px; display:block; }
+.priority-card strong{ display:block; font-size:13.6px; margin-bottom:5px; color:var(--dark-green); }
+.priority-card p{ font-size:12.3px; color:var(--ink-soft); line-height:1.5; }
+
+.vm-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+.vm-box{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:14px 16px; }
+.vm-box strong{ display:block; font-size:12px; letter-spacing:.03em; color:rgba(255,255,255,.75); margin-bottom:6px; }
+.vm-box p{ font-size:13px; line-height:1.55; color:rgba(255,255,255,.94); }
+
+.contact-note{ display:flex; align-items:center; gap:10px; background:var(--light-green); border-radius:10px; padding:11px 14px; font-size:12.8px; color:var(--ink); margin-top:14px; }
+.contact-note strong{ color:var(--dark-green); }
+
+/* ============================================================
+   SUB-TAB BAR (reusable for Organization / Recruitment / Well-being)
+   ============================================================ */
+.subtab-bar{ display:flex; gap:6px; background:var(--light-green); padding:4px; border-radius:10px; margin-bottom:18px; flex-wrap:wrap; }
+.subtab-bar .tab{ padding:8px 15px; }
+
+/* ============================================================
+   POSITIONS / DEPARTMENTS LIST
+   ============================================================ */
+.role-list{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.role-card{ border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+.role-card strong{ display:block; font-size:13.6px; margin-bottom:4px; color:var(--dark-green); }
+.role-card p{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
+
+/* ============================================================
+   PROCESS / STEP FLOW (Case Board)
+   ============================================================ */
+.step-flow{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:6px; }
+.step-flow .step-chip{ background:var(--light-green); border-radius:20px; padding:7px 13px; font-size:12px; font-weight:600; color:var(--dark-green); white-space:nowrap; }
+.step-flow .step-chip.hot{ background:var(--red-bg); color:var(--red); }
+.step-flow .step-chip.done{ background:var(--light-green); color:var(--primary); border:1px solid var(--primary); }
+.step-flow .step-arrow{ color:var(--ink-soft); font-size:13px; }
+
+/* ============================================================
+   WELL-BEING
+   ============================================================ */
+.wellbeing-panel .panel-note{ margin-bottom:16px; }
+.wellbeing-panel ul.plain-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.wellbeing-panel ul.plain-list li{ font-size:13.5px; line-height:1.5; padding-left:16px; position:relative; }
+.wellbeing-panel ul.plain-list li::before{ content:"\2022"; position:absolute; left:0; color:var(--secondary); font-weight:700; }
+
+/* ============================================================
+   APPOINTMENT CALENDAR
+   ============================================================ */
+.cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.cal-dow{ font-size:11px; font-weight:700; color:var(--ink-soft); text-align:center; padding-bottom:4px; }
+.cal-cell{ min-height:64px; border:1px solid var(--line); border-radius:8px; padding:6px; font-size:11px; color:var(--ink-soft); position:relative; }
+.cal-cell.empty{ border:none; }
+.cal-cell .cal-date{ font-weight:700; color:var(--ink); font-size:12px; }
+.cal-cell .cal-appt{ margin-top:4px; font-size:10px; background:var(--light-green); color:var(--dark-green); border-radius:5px; padding:2px 5px; display:block; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ============================================================
+   ARCHIVE
+   ============================================================ */
+.archive-row{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line); }
+.archive-row:last-child{ border-bottom:none; }
+.archive-icon{ width:38px; height:38px; border-radius:9px; background:var(--light-green); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:none; }
+.archive-meta{ flex:1; min-width:0; }
+.archive-meta strong{ display:block; font-size:13.6px; }
+.archive-meta span{ font-size:11.8px; color:var(--ink-soft); }
 
 /* ============================================================
    RESPONSIVE
@@ -491,6 +578,9 @@ i[data-ic="org"]::before{ content:"\1F3E2"; }
   .kanban{ grid-template-columns:1fr; }
   .kanban-4{ grid-template-columns:1fr; }
   .detail-list{ grid-template-columns:1fr; }
+  .vm-grid, .role-list{ grid-template-columns:1fr; }
+  .cal-grid{ grid-template-columns:repeat(7,minmax(34px,1fr)); }
+  .cal-cell{ min-height:44px; font-size:9.5px; }
   .content{ padding:20px 16px 50px; }
   .topbar{ padding:14px 16px; }
   .user-chip-text{ display:none; }

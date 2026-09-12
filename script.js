@@ -1,22 +1,67 @@
 /* ================================================================
    NIMBLY POD — application script
-   Modular sections: DATA -> STATE -> AUTH -> NAV -> RENDERERS -> CHARTS -> MODALS -> INIT
+   Modular sections: CONFIG -> DATA -> STATE -> AUTH -> NAV -> RENDERERS -> CHARTS -> MODALS -> INIT
    ================================================================ */
- 
+
+/* ---------------------------------------------------------------
+   0. CONFIG — paste your logo link here
+   --------------------------------------------------------------- */
+const CONFIG = {
+  // Paste an image link (e.g. an Imgur direct-image URL) to show your real
+  // company logo on the login screen, sidebar, and dashboard banner.
+  // Example: "https://i.imgur.com/xxxxxxx.png"
+  logoUrl: "",
+};
+
 /* ---------------------------------------------------------------
    1. DUMMY DATA
    --------------------------------------------------------------- */
 const DATA = {
- 
+
   users: {
     employee: { name:"Juno Dela Cruz", role:"Employee", empId:"NP-2021-0142", dept:"Customer Support", position:"Team Lead", initials:"JD" },
     hr:       { name:"Marisol Reyes",  role:"HR Staff",  empId:"NP-2019-0031", dept:"Human Resources", position:"HR Generalist", initials:"MR" },
     hrhead:   { name:"Bien Santos",    role:"HR Head",   empId:"NP-2015-0008", dept:"Human Resources", position:"Head of HR", initials:"BS" },
     admin:    { name:"Admin Root",     role:"Administrator", empId:"NP-2012-0001", dept:"IT & Systems", position:"System Administrator", initials:"AR" },
   },
- 
+
+  vision:"To become an exceptional company in providing efficient services and a workplace that prioritizes its employees, encouraging them to grow alongside the company and beyond.",
+  mission:"To bridge global businesses with agile, high-performing remote talent through cloud-driven efficiency, autonomous pod structures, and seamless workforce solutions.",
+
+  priorities: [
+    { title:"Deliver Top-Tier, Pod-Powered Talent", desc:"Recruiting, screening, and deploying highly skilled remote professionals and cross-functional Pods that align with each client's needs, work requirements, and culture." },
+    { title:"Ensure Operational Excellence and Service Reliability", desc:"Organized, reliable processes that let remote teams deliver quality service to clients across different time zones." },
+    { title:"Strengthening Technology, Automation, and Data Security", desc:"Modern, cloud-based tools that improve communication, teamwork, and employee management while keeping client information safe." },
+    { title:"Building Lasting Partnerships, Not Just Transactions", desc:"Working alongside clients as a true strategic partner \u2014 not a staffing vendor \u2014 to streamline operations and drive long-term growth." },
+    { title:"Maintaining Compliance, Ethical Standards, and Sustainable Growth", desc:"Responsible expansion that looks after our people, follows international labor and data-privacy law, and keeps ethics at the center of every market we grow into." },
+  ],
+
+  communicationsOfficerNote:"Talent postings are written and published by the Communications Officer, Talent Acquisition &amp; Workforce Planning.",
+
   departments: ["Customer Support","Operations","Workforce Management","IT & Systems","Human Resources","Finance","Quality Assurance"],
- 
+
+  hrDepartments: [
+    { name:"Talent Acquisition & Workforce Planning", resp:"Recruitment, selection, manpower planning, onboarding" },
+    { name:"Learning, Training & Development", resp:"Training, career development, succession, competencies" },
+    { name:"Performance & Rewards", resp:"Performance, compensation, incentives, recognition" },
+    { name:"Employee Relations & Well-being", resp:"Conflict, discipline, engagement, workplace relations" },
+    { name:"HR Operations, Analytics & Policy", resp:"HR systems, policies, records, metrics, compliance, analytics" },
+  ],
+
+  jobPositions: [
+    { title:"HR Generalist", desc:"Oversees the whole HR operation and submits the weekly monitoring report to the CEO." },
+    { title:"Department Head", desc:"Responsible for the final recommendation of their assigned HR division." },
+    { title:"HR Analyst", desc:"Responsible for evidence and data." },
+    { title:"HR Consultant", desc:"Responsible for professional interviews and external evidence." },
+    { title:"Policy Specialist", desc:"Responsible for policies, legal, and ethical considerations." },
+    { title:"Project Manager", desc:"Responsible for implementation." },
+    { title:"Communications Officer", desc:"Responsible for presenting the proposal and publishing talent postings." },
+    { title:"HR Staff", desc:"Assists and accomplishes tasks assigned by the Department Head." },
+  ],
+
+  googleSheetUrl:"https://docs.google.com/spreadsheets/d/18J1tjoRsoAgdy9nhEhekSO1jnMHTcxUa7a-QiyKUVe8/edit?usp=drivesdk",
+  googleDocUrl:"https://docs.google.com/document/d/1BRt8wJbG6IZHO0YtOveitAP6LDxwrZle379iNqynEH4/edit?usp=drivesdk",
+
   employees: [
     { id:"NP-2021-0142", name:"Juno Dela Cruz", dept:"Customer Support", position:"Team Lead", supervisor:"Bien Santos", status:"Active" },
     { id:"NP-2022-0087", name:"Aira Bautista", dept:"Customer Support", position:"CSR II", supervisor:"Juno Dela Cruz", status:"Active" },
@@ -33,46 +78,64 @@ const DATA = {
     { id:"NP-2024-0151", name:"Sam Ilagan", dept:"Customer Support", position:"CSR I", supervisor:"Juno Dela Cruz", status:"Probationary" },
     { id:"NP-2017-0019", name:"Grace Manansala", dept:"Operations", position:"Ops Manager", supervisor:"Bien Santos", status:"Active" },
   ],
- 
+
   activity: [
     { text:"Aira Bautista's leave request was approved", time:"12 minutes ago" },
     { text:"New candidate advanced to Interview — Ops Associate", time:"48 minutes ago" },
-    { text:"Payroll concern #C-1042 marked Resolved", time:"2 hours ago" },
+    { text:"Grievance G-1042 marked Resolved", time:"2 hours ago" },
     { text:"Denise Ocampo filed a certificate of employment request", time:"Yesterday, 4:15 PM" },
     { text:"Training \u201cData Privacy Refresher\u201d completed by 18 employees", time:"Yesterday, 11:02 AM" },
   ],
- 
+
   notifications: [
     { text:"Your appointment with Marisol Reyes is tomorrow, 10:00 AM", time:"1h" },
     { text:"Policy update: revised leave-filing cut-off", time:"3h" },
     { text:"Certificate of employment ready for pickup", time:"1d" },
   ],
- 
+
   ceoAnnouncement: {
     body:"This quarter, we're doubling down on the things that make Nimbly Pod feel like one team across every site \u2014 faster HR turnaround, clearer career paths, and more recognition for the people doing the work. Thank you for everything you bring to our floors every day.",
     sign:"\u2014 Rosario Viray, Chief Executive Officer",
   },
- 
+
+  talentKpis: {
+    headcount:248, openPositions:27, criticalPositions:8, turnoverRisks:12, expenseProjection:"\u20B148.2M", productivityRatio:"87%",
+  },
+
+  workforcePlanning: [
+    { metric:"Current Headcount", value:"248" },
+    { metric:"Target Headcount", value:"275" },
+    { metric:"Open Positions", value:"27" },
+    { metric:"Critical Positions", value:"8" },
+    { metric:"Turnover Risk", value:"12 employees" },
+    { metric:"Projected Turnover", value:"18.5%" },
+    { metric:"Annual Payroll", value:"\u20B142.6M" },
+    { metric:"Expense Projection", value:"\u20B148.2M" },
+    { metric:"Productivity Ratio", value:"87%" },
+    { metric:"Workforce Utilization", value:"91%" },
+  ],
+
   vacancies: [
     { position:"Customer Support Representative", dept:"Customer Support", openings:6, applicants:42, target:"Oct 15, 2026" },
     { position:"Workforce Management Analyst", dept:"Workforce Management", openings:1, applicants:11, target:"Sep 30, 2026" },
     { position:"Quality Assurance Analyst", dept:"Quality Assurance", openings:2, applicants:19, target:"Oct 05, 2026" },
     { position:"Operations Supervisor", dept:"Operations", openings:1, applicants:7, target:"Oct 20, 2026" },
   ],
- 
+
   pipelineStages: ["Application","Screening","Interview","Assessment","Selection","Offer","Onboarding"],
+  pipelineCounts: [42,18,11,7,4,3,2],
   candidates: [
     { id:"AP-3301", name:"Renz Cabrera", position:"CSR Representative", stage:0 },
+    { id:"AP-3305", name:"Trisha Ong", position:"CSR Representative", stage:0 },
     { id:"AP-3302", name:"Fatima Reyes", position:"CSR Representative", stage:1 },
+    { id:"AP-3298", name:"Dale Ferrer", position:"WFM Analyst", stage:1 },
     { id:"AP-3288", name:"Louie Gatchalian", position:"WFM Analyst", stage:2 },
     { id:"AP-3271", name:"Bea Salonga-Cruz", position:"QA Analyst", stage:3 },
     { id:"AP-3259", name:"Ivan Domingo", position:"Ops Supervisor", stage:4 },
     { id:"AP-3240", name:"Nica Alvero", position:"CSR Representative", stage:5 },
     { id:"AP-3199", name:"Josh Malabanan", position:"QA Analyst", stage:6 },
-    { id:"AP-3305", name:"Trisha Ong", position:"CSR Representative", stage:0 },
-    { id:"AP-3298", name:"Dale Ferrer", position:"WFM Analyst", stage:1 },
   ],
- 
+
   learningUpcoming: [
     { text:"Customer De-escalation Techniques \u2014 Sep 18, 9:00 AM", time:"in 7 days" },
     { text:"Data Privacy Refresher \u2014 Sep 22, 2:00 PM", time:"in 11 days" },
@@ -101,7 +164,7 @@ const DATA = {
     { text:"Cassy Uy identified as ready-now successor for Ops Manager", time:"Reviewed Aug 2026" },
     { text:"Kyle Fernandez on development track for HR Generalist", time:"Reviewed Jul 2026" },
   ],
- 
+
   announcements: [
     { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026", priority:"High" },
     { id:2, title:"Revised Leave-Filing Cut-off", category:"Policy", desc:"Starting October 1, leave requests must be filed at least 5 working days in advance except for emergency leave.", author:"Marisol Reyes", date:"Sep 08, 2026", priority:"High" },
@@ -110,14 +173,15 @@ const DATA = {
     { id:5, title:"Foundation Day Celebration", category:"Events", desc:"Mark your calendars \u2014 our 12th Foundation Day celebration is happening this October with games, food, and awards.", author:"Rosario Viray", date:"Aug 29, 2026", priority:"Normal" },
     { id:6, title:"Building B Fire Drill", category:"Emergency", desc:"A scheduled fire drill will take place in Building B on September 15 at 3:00 PM. Please follow floor marshal instructions.", author:"Admin Root", date:"Aug 27, 2026", priority:"High" },
   ],
- 
+
   appointments: [
-    { id:"AT-501", employee:"Juno Dela Cruz", hr:"Marisol Reyes", date:"2026-09-12", time:"10:00 AM", reason:"Benefits consultation", status:"Scheduled" },
-    { id:"AT-498", employee:"Denise Ocampo", hr:"Bien Santos", date:"2026-09-11", time:"2:30 PM", reason:"Return-to-work interview", status:"Ongoing" },
-    { id:"AT-490", employee:"Miko Villareal", hr:"Marisol Reyes", date:"2026-09-05", time:"9:00 AM", reason:"Probationary evaluation", status:"Completed" },
-    { id:"AT-484", employee:"Rhys Abad", hr:"Kyle Fernandez", date:"2026-09-02", time:"4:00 PM", reason:"Equipment concern escalation", status:"Cancelled" },
+    { id:"AT-501", employee:"Juno Dela Cruz", hr:"Marisol Reyes", type:"Online", date:"2026-09-12", time:"10:00 AM", reason:"Benefits consultation", status:"Accepted", notes:"", outcome:"" },
+    { id:"AT-498", employee:"Denise Ocampo", hr:"Bien Santos", type:"Face-to-face", date:"2026-09-11", time:"2:30 PM", reason:"Return-to-work interview", status:"Rescheduled", notes:"Moved from Sep 9 due to HR availability.", outcome:"" },
+    { id:"AT-490", employee:"Miko Villareal", hr:"Marisol Reyes", type:"Face-to-face", date:"2026-09-05", time:"9:00 AM", reason:"Probationary evaluation", status:"Completed", notes:"", outcome:"Extended probation by 30 days; performance plan issued." },
+    { id:"AT-484", employee:"Rhys Abad", hr:"Kyle Fernandez", type:"Online", date:"2026-09-02", time:"4:00 PM", reason:"Equipment concern escalation", status:"Declined", notes:"Redirected to IT Support ticketing.", outcome:"" },
+    { id:"AT-505", employee:"Sam Ilagan", hr:"Marisol Reyes", type:"Face-to-face", date:"2026-09-16", time:"11:00 AM", reason:"Well-being check-in", status:"Pending Review", notes:"", outcome:"" },
   ],
- 
+
   cases: [
     { number:"C-1042", employee:"Aira Bautista", category:"Attendance", status:"Resolved", priority:"Medium", assigned:"Marisol Reyes",
       description:"Repeated tardiness over two pay periods; requested clarification on shifting schedule accommodations.",
@@ -132,7 +196,7 @@ const DATA = {
       description:"Self-referred check-in following extended overtime during month-end close.",
       history:[ {text:"Case filed", time:"Sep 01, 2026"}, {text:"Initial consultation completed", time:"Sep 03, 2026"}, {text:"Workload review pending manager input", time:"Sep 08, 2026"} ] },
   ],
- 
+
   goals: [
     { title:"Reduce average handle time to under 6 minutes", progress:82 },
     { title:"Achieve 95% CSAT for the quarter", progress:91 },
@@ -150,7 +214,29 @@ const DATA = {
     { text:"Customer Support team hit 95% CSAT streak \u2014 team lunch unlocked", time:"Aug 28, 2026" },
     { text:"Aira Bautista recognized for zero-escalation month", time:"Aug 15, 2026" },
   ],
- 
+
+  wellbeingProcedures: [
+    "Employee raises a concern to their supervisor or directly to HR.",
+    "HR Staff logs the concern and assigns it a case number.",
+    "HR Generalist reviews it and determines the track: mediation, investigation, or referral.",
+    "Employee receives a response with next steps and an expected timeline.",
+    "All procedures follow the Employee Relations & Well-being policy on file in the Archive.",
+  ],
+  wellbeingInitiatives: [
+    "Monthly wellness check-ins for every team.",
+    "Mental health first-aid webinars, run quarterly.",
+    "Peer support circles facilitated by HR.",
+    "Flexible time-off allowance for well-being days.",
+  ],
+
+  archiveDocs: [
+    { title:"Employee Relations Policy v3.pdf", type:"Policy", date:"Aug 2026", by:"Bien Santos" },
+    { title:"Engagement Survey Interview Notes.docx", type:"Interview", date:"Jul 2026", by:"Marisol Reyes" },
+    { title:"Q2 Turnover Analysis Report.pdf", type:"Report", date:"Jul 2026", by:"Kyle Fernandez" },
+    { title:"Grievance Handling Procedure.pdf", type:"Policy", date:"Jun 2026", by:"Bien Santos" },
+    { title:"Compensation Benchmark Research.xlsx", type:"Research", date:"May 2026", by:"Patrice Lim" },
+  ],
+
   backupHistory: [
     { date:"Sep 11, 2026 \u2014 4:00 AM", type:"Automatic", size:"1.4 GB", status:"Success" },
     { date:"Sep 10, 2026 \u2014 4:00 AM", type:"Automatic", size:"1.4 GB", status:"Success" },
@@ -163,13 +249,11 @@ const DATA = {
     { text:"Admin Root added new department \u201cQuality Assurance\u201d", time:"Sep 09, 2026" },
   ],
 };
- 
-/* dashboard KPI + analytics KPI derived values */
+
 const KPI = {
   totalEmployees: DATA.employees.length,
-  openRequests: 9,
   pendingApprovals: 3,
-  upcomingAppointments: DATA.appointments.filter(a=>a.status==="Scheduled").length,
+  upcomingAppointments: DATA.appointments.filter(a=>a.status==="Pending Review" || a.status==="Accepted").length,
   newHires: 14,
   turnover: "4.1%",
   retention: "95.9%",
@@ -177,24 +261,27 @@ const KPI = {
   trainingCompletion: "78%",
   engagement: "84%",
 };
- 
+
 /* ---------------------------------------------------------------
    2. STATE
    --------------------------------------------------------------- */
 const STATE = {
   role: "employee",
   currentView: "dashboard",
-  dirTab: "list",
+  orgTab: "orgchart",
+  recruitTab: "talent",
   learnTab: "employee",
   annFilter: "All",
+  apptTab: "list",
+  wbTab: "procedures",
 };
- 
+
 /* ---------------------------------------------------------------
    3. NAV CONFIG
    --------------------------------------------------------------- */
 const NAV_MAIN = [
   { id:"dashboard",     label:"Dashboard",             icon:"dashboard",     roles:"all" },
-  { id:"directory",     label:"Employee Directory",    icon:"directory",     roles:"all" },
+  { id:"organization",  label:"Organization",          icon:"organization",  roles:"all" },
   { id:"analytics",     label:"HR Analytics",          icon:"analytics",     roles:["hr","hrhead","admin"] },
   { id:"performance",   label:"Performance",           icon:"performance",   roles:"all" },
   { id:"recruitment",   label:"Recruitment",           icon:"recruitment",   roles:["hr","hrhead","admin"] },
@@ -202,44 +289,48 @@ const NAV_MAIN = [
   { id:"announcements", label:"Announcements",         icon:"announcements", roles:"all" },
   { id:"appointments",  label:"Appointments",          icon:"appointments",  roles:"all" },
   { id:"cases",         label:"Case Board",            icon:"cases",         roles:"all" },
+  { id:"wellbeing",     label:"Employee Well-Being",   icon:"wellbeing",     roles:"all" },
   { id:"profile",       label:"My Profile",            icon:"profile",       roles:"all" },
+  { id:"archive",       label:"Archive",               icon:"archive",       roles:"all" },
   { id:"backup",        label:"Backup & Recovery",     icon:"backup",        roles:["admin"] },
   { id:"settings",      label:"Settings",              icon:"settings",      roles:"all" },
 ];
- 
+
 const NAV_HR = [
   { id:"recruitment",   label:"Talent Acquisition",                 icon:"talent",     roles:["hr","hrhead","admin"] },
   { id:"learning",      label:"Learning & Development",             icon:"ld",         roles:["hr","hrhead","admin"] },
   { id:"performance",   label:"Performance & Rewards",              icon:"rewards",    roles:["hr","hrhead","admin"] },
-  { id:"cases",         label:"Employee Relations & Well-being",    icon:"relations",  roles:["hr","hrhead","admin"] },
+  { id:"wellbeing",     label:"Employee Relations & Well-being",    icon:"relations",  roles:["hr","hrhead","admin"] },
   { id:"analytics",     label:"HR Operations & Analytics",          icon:"ops",        roles:["hr","hrhead","admin"] },
-  { id:"directory",     label:"User Management",                   icon:"users",      roles:["admin"] },
-  { id:"directory",     label:"Organization Management",           icon:"org",        roles:["admin"], tab:"org" },
+  { id:"organization",  label:"User Management",                    icon:"users",      roles:["admin"], tab:"employeedir" },
+  { id:"organization",  label:"Organization Management",            icon:"org",        roles:["admin"], tab:"orgchart" },
 ];
- 
+
 const VIEW_META = {
   dashboard:     ["Dashboard", "Welcome back to your pod."],
-  directory:     ["Employee Directory", "Every teammate, their team, and their status."],
+  organization:  ["Organization", "Structure, departments, people, and roles."],
   analytics:     ["HR Analytics", "Headcount, turnover, and hiring at a glance."],
   performance:   ["Performance", "Goals, ratings, and recognition."],
-  recruitment:   ["Talent Acquisition", "From application to onboarding."],
+  recruitment:   ["Talent Acquisition", "From workforce planning to successful hiring."],
   learning:      ["Learning & Development", "Courses, certifications, and growth."],
   announcements: ["Announcement Center", "What's happening across the company."],
   appointments:  ["Appointments", "HR consultations, scheduled and tracked."],
   cases:         ["Case Board", "Employee relations, start to resolution."],
+  wellbeing:     ["Employee Well-Being", "Procedures, grievances, mediation, and support."],
   profile:       ["My Profile", "Your employment details and documents."],
+  archive:       ["Archive", "Research, interviews, reports, and policy evidence."],
   backup:        ["Backup & Recovery", "System backups and administrator logs."],
   settings:      ["Settings", "Notification and account preferences."],
   help:          ["Help", "Reach the HR helpdesk."],
 };
- 
+
 /* ---------------------------------------------------------------
    4. HELPERS
    --------------------------------------------------------------- */
 function $(sel, ctx){ return (ctx||document).querySelector(sel); }
 function $all(sel, ctx){ return Array.from((ctx||document).querySelectorAll(sel)); }
 function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
- 
+
 function toast(msg){
   const t = $("#toast");
   t.textContent = msg;
@@ -247,39 +338,56 @@ function toast(msg){
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>t.classList.remove("show"), 2600);
 }
- 
+
 function statusBadgeClass(status){
   const map = {
     "Active":"badge-green", "Completed":"badge-green", "Resolved":"badge-green", "Scheduled":"badge-blue",
     "On Leave":"badge-amber", "Ongoing":"badge-blue", "Under Review":"badge-amber", "Action Required":"badge-red",
     "Probationary":"badge-amber", "Open":"badge-red", "Cancelled":"badge-grey", "Success":"badge-green",
+    "Pending Review":"badge-grey", "Accepted":"badge-amber", "Rescheduled":"badge-blue", "Declined":"badge-red",
   };
   return map[status] || "badge-grey";
 }
- 
+function apptStatusIcon(status){
+  const map = { "Accepted":"\uD83D\uDFE1", "Rescheduled":"\uD83D\uDD35", "Declined":"\uD83D\uDD34", "Completed":"\u2705", "Pending Review":"\u26AA", "Cancelled":"\u26AB" };
+  return map[status] || "";
+}
+
 function roleAllowed(roles){ return roles === "all" || roles.includes(STATE.role); }
- 
+function isHrRole(){ return ["hr","hrhead","admin"].includes(STATE.role); }
+
 /* ---------------------------------------------------------------
-   5. AUTH SCREEN LOGIC
+   5. LOGO
+   --------------------------------------------------------------- */
+function applyLogo(){
+  if(!CONFIG.logoUrl) return;
+  $all("img[data-logo]").forEach(img=>{
+    img.src = CONFIG.logoUrl;
+    img.addEventListener("load", ()=> img.classList.add("loaded"));
+    img.addEventListener("error", ()=> img.classList.remove("loaded"));
+  });
+}
+
+/* ---------------------------------------------------------------
+   6. AUTH SCREEN LOGIC
    --------------------------------------------------------------- */
 function initAuth(){
   $("#show-register").addEventListener("click", e=>{ e.preventDefault(); $("#panel-login").classList.add("hidden"); $("#panel-register").classList.remove("hidden"); });
   $("#show-login").addEventListener("click", e=>{ e.preventDefault(); $("#panel-register").classList.add("hidden"); $("#panel-login").classList.remove("hidden"); });
- 
+
   $("#pw-toggle").addEventListener("click", ()=>{
     const input = $("#login-pw");
     const show = input.type === "password";
     input.type = show ? "text" : "password";
     $("#pw-toggle").textContent = show ? "Hide" : "Show";
   });
- 
+
   $("#login-form").addEventListener("submit", e=>{
     e.preventDefault();
     STATE.role = $("#login-role").value;
     enterApp();
   });
- 
-  /* registration steps */
+
   $all("[data-next]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const step = btn.closest(".reg-step");
@@ -290,7 +398,7 @@ function initAuth(){
   $all("[data-back]").forEach(btn=>{
     btn.addEventListener("click", ()=> goToStep(btn.dataset.back));
   });
- 
+
   $("#register-form").addEventListener("submit", e=>{
     e.preventDefault();
     toast("Account created \u2014 you can now sign in.");
@@ -301,13 +409,13 @@ function initAuth(){
     goToStep("1");
   });
 }
- 
+
 function validateStep(stepEl){
   const inputs = $all("input[required], select[required]", stepEl);
   for(const i of inputs){ if(!i.value){ i.focus(); return false; } }
   return true;
 }
- 
+
 function goToStep(n){
   $all(".reg-step").forEach(s=> s.classList.toggle("active", s.dataset.step === n));
   $all("#reg-steps li").forEach(li=>{
@@ -325,7 +433,7 @@ function goToStep(n){
     $("#confirm-summary").innerHTML = Object.entries(rows).map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
   }
 }
- 
+
 function enterApp(){
   const u = DATA.users[STATE.role];
   $("#auth-screen").classList.add("hidden");
@@ -338,16 +446,16 @@ function enterApp(){
   switchView("dashboard");
   toast(`Signed in as ${u.name}`);
 }
- 
+
 function logout(){
   $("#app-shell").classList.add("hidden");
   $("#auth-screen").classList.remove("hidden");
   $("#login-form").reset();
   $("#sidebar").classList.remove("open");
 }
- 
+
 /* ---------------------------------------------------------------
-   6. SIDEBAR / NAV
+   7. SIDEBAR / NAV
    --------------------------------------------------------------- */
 function buildNavList(container, items){
   container.innerHTML = "";
@@ -358,14 +466,14 @@ function buildNavList(container, items){
     if(item.tab) btn.dataset.tab = item.tab;
     btn.addEventListener("click", ()=>{
       switchView(item.id);
-      if(item.tab === "org"){ STATE.dirTab = "org"; renderDirectory(); syncDirTabs(); }
+      if(item.id === "organization" && item.tab){ STATE.orgTab = item.tab; renderOrganization(); syncOrgTabs(); }
       if(window.innerWidth <= 900) $("#sidebar").classList.remove("open");
     });
     li.appendChild(btn);
     container.appendChild(li);
   });
 }
- 
+
 function renderSidebar(){
   buildNavList($("#nav-main"), NAV_MAIN);
   const hrItems = NAV_HR.filter(i=>roleAllowed(i.roles));
@@ -373,13 +481,13 @@ function renderSidebar(){
   buildNavList($("#nav-hr"), NAV_HR);
   markActiveNav();
 }
- 
+
 function markActiveNav(){
   $all(".nav-item[data-view]").forEach(b=>{
     b.classList.toggle("active", b.dataset.view === STATE.currentView && !b.dataset.tab);
   });
 }
- 
+
 function switchView(viewId){
   STATE.currentView = viewId;
   $all(".view").forEach(v=> v.classList.add("hidden"));
@@ -388,27 +496,29 @@ function switchView(viewId){
   $("#view-title").textContent = meta[0];
   $("#view-subtitle").textContent = meta[1];
   markActiveNav();
-  $all(".hr-only").forEach(elm => elm.classList.toggle("hidden", !roleAllowed(["hr","hrhead","admin"])));
+  $all(".hr-only").forEach(elm => elm.classList.toggle("hidden", !isHrRole()));
   renderView(viewId);
 }
- 
+
 function renderView(viewId){
   const map = {
-    dashboard: renderDashboard, directory: renderDirectory, analytics: renderAnalytics,
+    dashboard: renderDashboard, organization: renderOrganization, analytics: renderAnalytics,
     performance: renderPerformance, recruitment: renderRecruitment, learning: renderLearning,
     announcements: renderAnnouncements, appointments: renderAppointments, cases: renderCases,
-    profile: renderProfile, backup: renderBackup, settings: renderSettings, help: ()=>{},
+    wellbeing: renderWellbeing, profile: renderProfile, archive: renderArchive,
+    backup: renderBackup, settings: renderSettings, help: ()=>{},
   };
   (map[viewId] || function(){})();
 }
- 
+
 /* ---------------------------------------------------------------
-   7. RENDER: DASHBOARD
+   8. RENDER: DASHBOARD
    --------------------------------------------------------------- */
 function renderDashboard(){
+  const activeCases = DATA.cases.filter(c=>c.status!=="Resolved").length;
   const kpis = [
     { label:"Total employees", value:KPI.totalEmployees, delta:"+3 this month", up:true },
-    { label:"Open requests", value:KPI.openRequests, delta:"2 due today", up:false },
+    { label:"Active cases", value:activeCases, delta:"awaiting resolution", up:false },
     { label:"Pending approvals", value:KPI.pendingApprovals, delta:"awaiting HR Head", up:false },
     { label:"Upcoming appointments", value:KPI.upcomingAppointments, delta:"this week", up:true },
   ];
@@ -418,37 +528,86 @@ function renderDashboard(){
       <div class="kpi-value">${k.value}</div>
       <span class="kpi-delta ${k.up?'up':'down'}">${k.delta}</span>
     </div>`).join("");
- 
+
+  $("#dash-priorities").innerHTML = DATA.priorities.map((p,i)=>`
+    <div class="priority-card">
+      <span class="priority-num">0${i+1}</span>
+      <strong>${p.title}</strong>
+      <p>${p.desc}</p>
+    </div>`).join("");
+
   $("#dash-ceo").innerHTML = `<p>${DATA.ceoAnnouncement.body}</p><span class="ceo-sign">${DATA.ceoAnnouncement.sign}</span>`;
- 
+  $("#dash-contact").innerHTML = `<span>&#128276;</span><span>${DATA.communicationsOfficerNote}</span>`;
+
   $("#dash-activity").innerHTML = DATA.activity.map(a=>`
     <li><span class="dot-ic"></span><div class="act-text"><strong>${a.text}</strong><span class="act-time">${a.time}</span></div></li>`).join("");
- 
+
   $("#dash-notifs").innerHTML = DATA.notifications.map(n=>`
     <li><span>${n.text}</span><span class="n-time">${n.time}</span></li>`).join("");
 }
- 
+
 /* ---------------------------------------------------------------
-   8. RENDER: DIRECTORY
+   9. RENDER: ORGANIZATION (5 subtabs)
    --------------------------------------------------------------- */
-function renderDirectory(){
+function renderOrganization(){
+  syncOrgTabs();
+  buildOrgChart();
+  renderReporting();
+  renderDeptDirectory();
+  renderEmployeeDirectory();
+  renderPositions();
+  $("#dir-sheet-link").href = DATA.googleSheetUrl;
+}
+
+function syncOrgTabs(){
+  $all("[data-orgtab]").forEach(t=> t.classList.toggle("active", t.dataset.orgtab === STATE.orgTab));
+  ["orgchart","reporting","deptdir","employeedir","positions"].forEach(tab=>{
+    $(`#org-${tab}`).classList.toggle("hidden", STATE.orgTab !== tab);
+  });
+}
+
+function buildOrgChart(){
+  const ceo = "Rosario Viray";
+  const level1 = DATA.employees.filter(e=>e.supervisor === ceo);
+  const html = [];
+  html.push(`<div class="org-row"><div class="org-node top"><strong>${ceo}</strong><span>Chief Executive Officer</span></div></div>`);
+  html.push(`<div class="org-connector"></div>`);
+  html.push(`<div class="org-row">` + level1.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
+  const level2 = DATA.employees.filter(e=> level1.some(l=>l.name===e.supervisor));
+  if(level2.length){
+    html.push(`<div class="org-connector"></div>`);
+    html.push(`<div class="org-row">` + level2.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
+  }
+  $("#org-chart").innerHTML = html.join("");
+}
+
+function renderReporting(){
+  $("#org-reporting-body").innerHTML = DATA.employees.map(e=>`
+    <tr><td class="cell-name">${e.name}</td><td>${e.position}</td><td>${e.supervisor}</td></tr>`).join("");
+}
+
+function renderDeptDirectory(){
+  $("#org-deptdir-body").innerHTML = DATA.hrDepartments.map(d=>`
+    <tr><td class="cell-name">${d.name}</td><td>${d.resp}</td></tr>`).join("");
+}
+
+function renderEmployeeDirectory(){
   const deptSel = $("#dir-filter-dept");
   if(!deptSel.dataset.built){
     deptSel.innerHTML = `<option value="">All departments</option>` + DATA.departments.map(d=>`<option value="${d}">${d}</option>`).join("");
     deptSel.dataset.built = "1";
   }
-  syncDirTabs();
   const term = ($("#dir-search").value || "").toLowerCase();
   const dept = $("#dir-filter-dept").value;
   const status = $("#dir-filter-status").value;
- 
+
   const rows = DATA.employees.filter(e=>{
     const matchTerm = !term || e.name.toLowerCase().includes(term) || e.id.toLowerCase().includes(term) || e.dept.toLowerCase().includes(term);
     const matchDept = !dept || e.dept === dept;
     const matchStatus = !status || e.status === status;
     return matchTerm && matchDept && matchStatus;
   });
- 
+
   $("#dir-table-body").innerHTML = rows.map(e=>`
     <tr>
       <td class="cell-name">${e.name}<span class="cell-sub">${e.position}</span></td>
@@ -458,34 +617,15 @@ function renderDirectory(){
       <td>${e.supervisor}</td>
       <td><span class="badge ${statusBadgeClass(e.status)}">${e.status}</span></td>
     </tr>`).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">No employees match your filters.</td></tr>`;
- 
-  if(STATE.dirTab === "org") buildOrgChart();
 }
- 
-function syncDirTabs(){
-  $all("[data-dirtab]").forEach(t=> t.classList.toggle("active", t.dataset.dirtab === STATE.dirTab));
-  $("#dir-list-wrap").classList.toggle("hidden", STATE.dirTab !== "list");
-  $("#dir-org-wrap").classList.toggle("hidden", STATE.dirTab !== "org");
+
+function renderPositions(){
+  $("#org-positions-list").innerHTML = DATA.jobPositions.map(p=>`
+    <div class="role-card"><strong>${p.title}</strong><p>${p.desc}</p></div>`).join("");
 }
- 
-function buildOrgChart(){
-  const byName = Object.fromEntries(DATA.employees.map(e=>[e.name, e]));
-  const ceo = "Rosario Viray";
-  const level1 = DATA.employees.filter(e=>e.supervisor === ceo);
-  const html = [];
-  html.push(`<div class="org-row"><div class="org-node top"><strong>${ceo}</strong><span>Chief Executive Officer</span></div></div>`);
-  html.push(`<div class="org-connector"></div>`);
-  html.push(`<div class="org-row">` + level1.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
-  const level2 = DATA.employees.filter(e=> byName[e.supervisor] && level1.some(l=>l.name===e.supervisor));
-  if(level2.length){
-    html.push(`<div class="org-connector"></div>`);
-    html.push(`<div class="org-row">` + level2.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
-  }
-  $("#org-chart").innerHTML = html.join("");
-}
- 
+
 /* ---------------------------------------------------------------
-   9. RENDER: ANALYTICS
+   10. RENDER: ANALYTICS
    --------------------------------------------------------------- */
 function renderAnalytics(){
   const kpis = [
@@ -498,26 +638,25 @@ function renderAnalytics(){
   ];
   $("#an-kpis").innerHTML = kpis.map(k=>`
     <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
- 
+
   const deptCounts = DATA.departments.map(d=> DATA.employees.filter(e=>e.dept===d).length);
-  drawBarChart("chart-headcount", DATA.departments.map(d=>d.split(" ")[0]), deptCounts, "#2F8B5B");
- 
+  drawBarChart("chart-headcount", DATA.departments.map(d=>d.split(" ")[0]), deptCounts, "#17382A");
+
   drawLineChart("chart-turnover",
     ["Apr","May","Jun","Jul","Aug","Sep"],
-    [ { name:"Retention %", color:"#1F6B45", values:[93,94,95,94.5,95.5,95.9] },
-      { name:"Turnover %",  color:"#B4791F", values:[6,5.4,4.9,5.2,4.4,4.1] } ]
+    [ { name:"Retention %", color:"#17382A", values:[93,94,95,94.5,95.5,95.9] },
+      { name:"Turnover %",  color:"#0F162A", values:[6,5.4,4.9,5.2,4.4,4.1] } ]
   );
- 
-  const stageCounts = DATA.pipelineStages.map((s,i)=> DATA.candidates.filter(c=>c.stage===i).length);
-  const colors = ["#1F6B45","#2F8B5B","#5CAE81","#8FCBA8","#B4791F","#2A5C8A","#17382A"];
-  drawDonutChart("chart-recruit", DATA.pipelineStages, stageCounts, colors);
-  $("#chart-recruit-legend").innerHTML = DATA.pipelineStages.map((s,i)=>`<span><i style="background:${colors[i]}"></i>${s} (${stageCounts[i]})</span>`).join("");
- 
-  drawBarChart("chart-training", ["Support","Ops","WFM","IT","HR","Finance","QA"], [82,74,68,90,95,71,77], "#1F6B45");
+
+  const colors = ["#17382A","#1F6B45","#2F8B5B","#5CAE81","#9A6B00","#0F162A","#536860"];
+  drawDonutChart("chart-recruit", DATA.pipelineStages, DATA.pipelineCounts, colors);
+  $("#chart-recruit-legend").innerHTML = DATA.pipelineStages.map((s,i)=>`<span><i style="background:${colors[i]}"></i>${s} (${DATA.pipelineCounts[i]})</span>`).join("");
+
+  drawBarChart("chart-training", ["Support","Ops","WFM","IT","HR","Finance","QA"], [82,74,68,90,95,71,77], "#17382A");
 }
- 
+
 /* ---------------------------------------------------------------
-   10. RENDER: PERFORMANCE
+   11. RENDER: PERFORMANCE
    --------------------------------------------------------------- */
 function renderPerformance(){
   $("#perf-kpis").innerHTML = [
@@ -525,54 +664,71 @@ function renderPerformance(){
     { label:"Goals on track", value:"87%" },
     { label:"Recognitions this month", value:"11" },
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
- 
+
   $("#perf-goals").innerHTML = DATA.goals.map(g=>`
     <div class="goal-item">
       <div class="goal-top"><strong>${g.title}</strong><span>${g.progress}%</span></div>
       <div class="progress-track"><div class="progress-fill" style="width:${g.progress}%"></div></div>
     </div>`).join("");
- 
+
   $("#perf-rewards").innerHTML = DATA.rewards.map(r=>`
     <li><span class="dot-ic"></span><div class="act-text"><strong>${r.text}</strong><span class="act-time">${r.time}</span></div></li>`).join("");
- 
+
   const trendArrow = { up:"&#8599; up", down:"&#8600; down", flat:"&#8594; steady" };
   $("#perf-ratings-body").innerHTML = DATA.ratings.map(r=>`
     <tr><td class="cell-name">${r.employee}</td><td>${r.cycle}</td><td><span class="badge badge-green">${r.rating}</span></td><td>${trendArrow[r.trend]}</td></tr>`).join("");
 }
- 
+
 /* ---------------------------------------------------------------
-   11. RENDER: RECRUITMENT
+   12. RENDER: RECRUITMENT (Talent Acquisition / Workforce Planning)
    --------------------------------------------------------------- */
 function renderRecruitment(){
-  const totalApplicants = DATA.vacancies.reduce((s,v)=>s+v.applicants,0);
+  syncRecTabs();
+
   $("#rec-kpis").innerHTML = [
-    { label:"Open vacancies", value: DATA.vacancies.reduce((s,v)=>s+v.openings,0) },
-    { label:"Total applicants", value: totalApplicants },
-    { label:"Avg. time to hire", value:"21 days" },
-    { label:"Offer acceptance", value:"88%" },
+    { label:"Current headcount", value:DATA.talentKpis.headcount },
+    { label:"Open positions", value:DATA.talentKpis.openPositions },
+    { label:"Critical positions", value:DATA.talentKpis.criticalPositions },
+    { label:"Turnover risks", value:DATA.talentKpis.turnoverRisks },
+    { label:"Expense projection", value:DATA.talentKpis.expenseProjection },
+    { label:"Productivity ratio", value:DATA.talentKpis.productivityRatio },
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
- 
+
+  $("#rec-contact").innerHTML = `<span>&#128172;</span><span>${DATA.communicationsOfficerNote}</span>`;
+
   $("#rec-vacancies-body").innerHTML = DATA.vacancies.map(v=>`
     <tr><td class="cell-name">${v.position}</td><td>${v.dept}</td><td>${v.openings}</td><td>${v.applicants}</td><td>${v.target}</td></tr>`).join("");
- 
+
   renderKanbanRecruitment();
+
+  $("#rec-workforce-body").innerHTML = DATA.workforcePlanning.map(m=>`
+    <tr><td class="cell-name">${m.metric}</td><td>${m.value}</td></tr>`).join("");
 }
- 
+
+function syncRecTabs(){
+  $all("[data-rectab]").forEach(t=> t.classList.toggle("active", t.dataset.rectab === STATE.recruitTab));
+  $("#rec-talent").classList.toggle("hidden", STATE.recruitTab !== "talent");
+  $("#rec-workforce").classList.toggle("hidden", STATE.recruitTab !== "workforce");
+}
+
 function renderKanbanRecruitment(){
   const wrap = $("#rec-kanban");
   wrap.innerHTML = DATA.pipelineStages.map((stage,i)=>{
     const cards = DATA.candidates.filter(c=>c.stage===i);
+    const officialCount = DATA.pipelineCounts[i];
+    const extra = officialCount - cards.length;
     return `<div class="kan-col">
-      <div class="kan-col-head"><h4>${stage}</h4><span class="kan-count">${cards.length}</span></div>
+      <div class="kan-col-head"><h4>${stage}</h4><span class="kan-count">${officialCount}</span></div>
       ${cards.map(c=>`
         <div class="kan-card">
           <strong>${c.name}</strong>
           <div class="kan-meta">${c.position} &middot; ${c.id}</div>
           ${i < DATA.pipelineStages.length-1 ? `<button class="kan-advance" data-advance="${c.id}">Advance &rarr;</button>` : `<span class="badge badge-green">Onboarding</span>`}
         </div>`).join("")}
+      ${extra > 0 ? `<div class="kan-meta" style="text-align:center;padding:4px 0;">+${extra} more</div>` : ""}
     </div>`;
   }).join("");
- 
+
   $all("[data-advance]", wrap).forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const cand = DATA.candidates.find(c=>c.id===btn.dataset.advance);
@@ -584,54 +740,54 @@ function renderKanbanRecruitment(){
     });
   });
 }
- 
+
 /* ---------------------------------------------------------------
-   12. RENDER: LEARNING & DEVELOPMENT
+   13. RENDER: LEARNING & DEVELOPMENT
    --------------------------------------------------------------- */
 function renderLearning(){
   $all("[data-learntab]").forEach(t=> t.classList.toggle("active", t.dataset.learntab === STATE.learnTab));
   $("#learn-employee").classList.toggle("hidden", STATE.learnTab !== "employee");
   $("#learn-hr").classList.toggle("hidden", STATE.learnTab !== "hr");
- 
+
   $("#learn-upcoming").innerHTML = DATA.learningUpcoming.map(u=>`
     <li><span class="dot-ic"></span><div class="act-text"><strong>${u.text}</strong><span class="act-time">${u.time}</span></div></li>`).join("");
- 
+
   $("#learn-assigned").innerHTML = DATA.learningAssigned.map(c=>`
     <div class="goal-item">
       <div class="goal-top"><strong>${c.title}</strong><span>${c.progress}%</span></div>
       <div class="progress-track"><div class="progress-fill" style="width:${c.progress}%"></div></div>
     </div>`).join("");
- 
+
   $("#learn-completed-body").innerHTML = DATA.learningCompleted.map(c=>`
     <tr><td class="cell-name">${c.title}</td><td>${c.date}</td><td>${c.score}</td><td><span class="badge badge-green">${c.status}</span></td></tr>`).join("");
- 
+
   $("#learn-hr-kpis").innerHTML = [
     { label:"Sessions this month", value:"6" },
     { label:"Avg. completion rate", value:KPI.trainingCompletion },
     { label:"Competency gaps flagged", value: DATA.competencyGaps.length },
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
- 
+
   $("#learn-calendar-body").innerHTML = DATA.trainingCalendar.map(s=>`
     <tr><td class="cell-name">${s.session}</td><td>${s.facilitator}</td><td>${s.date}</td><td>${s.attendance}</td><td>${s.completion}%</td></tr>`).join("");
- 
+
   $("#learn-gaps").innerHTML = DATA.competencyGaps.map(g=>`
     <div class="goal-item">
       <div class="goal-top"><strong>${g.title}</strong><span>${g.progress}%</span></div>
       <div class="progress-track"><div class="progress-fill" style="width:${g.progress}%"></div></div>
     </div>`).join("");
- 
+
   $("#learn-succession").innerHTML = DATA.succession.map(s=>`
     <li><span class="dot-ic"></span><div class="act-text"><strong>${s.text}</strong><span class="act-time">${s.time}</span></div></li>`).join("");
 }
- 
+
 /* ---------------------------------------------------------------
-   13. RENDER: ANNOUNCEMENTS
+   14. RENDER: ANNOUNCEMENTS
    --------------------------------------------------------------- */
 function renderAnnouncements(){
   const cats = ["All","Company","HR","Training","Policy","Events","Emergency"];
   $("#ann-filters").innerHTML = cats.map(c=>`<button class="chip ${STATE.annFilter===c?'active':''}" data-cat="${c}">${c}</button>`).join("");
   $all("[data-cat]").forEach(chip=> chip.addEventListener("click", ()=>{ STATE.annFilter = chip.dataset.cat; renderAnnouncements(); }));
- 
+
   const list = DATA.announcements.filter(a=> STATE.annFilter==="All" || a.category===STATE.annFilter);
   $("#ann-grid").innerHTML = list.map(a=>`
     <div class="ann-card" data-ann="${a.id}">
@@ -640,10 +796,10 @@ function renderAnnouncements(){
       <p>${a.desc.slice(0,90)}${a.desc.length>90 ? '\u2026' : ''}</p>
       <div class="ann-meta">${a.author} &middot; ${a.date}</div>
     </div>`).join("") || `<p style="color:var(--ink-soft);">No announcements in this category yet.</p>`;
- 
+
   $all("[data-ann]").forEach(card=> card.addEventListener("click", ()=> openAnnouncement(Number(card.dataset.ann))));
 }
- 
+
 function openAnnouncement(id){
   const a = DATA.announcements.find(x=>x.id===id);
   if(!a) return;
@@ -654,36 +810,138 @@ function openAnnouncement(id){
     <p style="font-size:12.5px;color:var(--ink-soft);">Posted by ${a.author} on ${a.date}</p>`;
   openModal("modal-announcement");
 }
- 
+
 /* ---------------------------------------------------------------
-   14. RENDER: APPOINTMENTS
+   15. RENDER: APPOINTMENTS (list / calendar)
    --------------------------------------------------------------- */
 function renderAppointments(){
+  syncApptTabs();
   const status = $("#appt-filter-status").value;
   const rows = DATA.appointments.filter(a=> !status || a.status === status);
+
   $("#appt-table-body").innerHTML = rows.map(a=>`
-    <tr>
+    <tr data-apptrow="${a.id}" style="cursor:pointer;">
       <td class="cell-name">${a.employee}</td>
       <td>${a.hr}</td>
+      <td>${a.type}</td>
       <td>${a.date}</td>
       <td>${a.time}</td>
       <td>${a.reason}</td>
-      <td><span class="badge ${statusBadgeClass(a.status)}">${a.status}</span></td>
-      <td>${a.status==="Scheduled" ? `<button class="link-btn" data-cancel="${a.id}">Cancel</button>` : ""}</td>
-    </tr>`).join("") || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px;">No appointments match this filter.</td></tr>`;
- 
-  $all("[data-cancel]").forEach(btn=> btn.addEventListener("click", ()=>{
-    const a = DATA.appointments.find(x=>x.id===btn.dataset.cancel);
-    if(a){ a.status = "Cancelled"; toast("Appointment cancelled"); renderAppointments(); }
+      <td><span class="badge ${statusBadgeClass(a.status)}">${apptStatusIcon(a.status)} ${a.status}</span></td>
+      <td>${isHrRole() && a.status==="Pending Review" ? `
+        <button class="link-btn" data-quickaccept="${a.id}">Accept</button>` : ""}</td>
+    </tr>`).join("") || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">No appointments match this filter.</td></tr>`;
+
+  $all("[data-apptrow]").forEach(row=> row.addEventListener("click", (e)=>{
+    if(e.target.closest("[data-quickaccept]")) return;
+    openApptDetail(row.dataset.apptrow);
   }));
+  $all("[data-quickaccept]").forEach(btn=> btn.addEventListener("click", e=>{
+    e.stopPropagation();
+    setApptStatus(btn.dataset.quickaccept, "Accepted");
+  }));
+
+  renderApptCalendar();
 }
- 
+
+function syncApptTabs(){
+  $all("[data-appttab]").forEach(t=> t.classList.toggle("active", t.dataset.appttab === STATE.apptTab));
+  $("#appt-list-wrap").classList.toggle("hidden", STATE.apptTab !== "list");
+  $("#appt-cal-wrap").classList.toggle("hidden", STATE.apptTab !== "calendar");
+}
+
+function renderApptCalendar(){
+  const year = 2026, month = 8; // September (0-indexed)
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const byDate = {};
+  DATA.appointments.forEach(a=>{ (byDate[a.date] = byDate[a.date] || []).push(a); });
+
+  const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  let html = dows.map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  for(let i=0;i<firstDow;i++) html += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `2026-09-${String(d).padStart(2,"0")}`;
+    const items = byDate[iso] || [];
+    html += `<div class="cal-cell"><span class="cal-date">${d}</span>${items.map(a=>`<span class="cal-appt">${a.time} ${a.employee.split(" ")[0]}</span>`).join("")}</div>`;
+  }
+  $("#cal-grid").innerHTML = html;
+}
+
+function setApptStatus(id, status){
+  const a = DATA.appointments.find(x=>x.id===id);
+  if(!a) return;
+  a.status = status;
+  DATA.activity.unshift({ text:`Appointment ${id} (${a.employee}) marked ${status}`, time:"Just now" });
+  toast(`Appointment ${status}`);
+  renderAppointments();
+}
+
+function openApptDetail(id){
+  const a = DATA.appointments.find(x=>x.id===id);
+  if(!a) return;
+  $("#appt-modal-title").textContent = `Appointment ${a.id}`;
+  $("#appt-modal-body").innerHTML = `
+    <div class="case-detail-grid">
+      <div><dt>Employee</dt><dd>${a.employee}</dd></div>
+      <div><dt>HR representative</dt><dd>${a.hr}</dd></div>
+      <div><dt>Type</dt><dd>${a.type}</dd></div>
+      <div><dt>Date &amp; time</dt><dd>${a.date} &middot; ${a.time}</dd></div>
+      <div style="grid-column:1/-1;"><dt>Status</dt><dd><span class="badge ${statusBadgeClass(a.status)}">${apptStatusIcon(a.status)} ${a.status}</span></dd></div>
+    </div>
+    <p style="font-size:13.5px;margin-bottom:14px;"><strong>Reason:</strong> ${a.reason}</p>
+    <label class="field"><span>Notes</span><textarea id="appt-detail-notes" rows="3">${a.notes||""}</textarea></label>
+    <label class="field"><span>Outcome</span><textarea id="appt-detail-outcome" rows="3" placeholder="Record what happened during the appointment&hellip;">${a.outcome||""}</textarea></label>
+    <button type="button" class="btn btn-ghost btn-sm" id="appt-upload-btn">Upload document</button>
+    <div class="case-actions-row">
+      ${isHrRole() && a.status==="Pending Review" ? `
+        <button class="btn btn-ghost btn-sm" data-setstatus="Accepted">&#128993; Accept</button>
+        <button class="btn btn-ghost btn-sm" data-setstatus="Rescheduled">&#128309; Reschedule</button>
+        <button class="btn btn-ghost btn-sm" data-setstatus="Declined">&#128308; Decline</button>` : ""}
+      ${a.status !== "Cancelled" && a.status !== "Completed" ? `<button class="btn btn-ghost btn-sm" data-setstatus="Cancelled">Cancel</button>` : ""}
+      <button class="btn btn-primary btn-sm" id="appt-save-btn">Save notes</button>
+    </div>`;
+
+  $("#appt-upload-btn").addEventListener("click", ()=> toast("Document attached to this appointment"));
+  $all("[data-setstatus]").forEach(btn=> btn.addEventListener("click", ()=>{
+    setApptStatus(a.id, btn.dataset.setstatus);
+    closeModals();
+  }));
+  $("#appt-save-btn").addEventListener("click", ()=>{
+    a.notes = $("#appt-detail-notes").value;
+    a.outcome = $("#appt-detail-outcome").value;
+    toast("Appointment notes saved");
+    closeModals();
+  });
+
+  openModal("modal-appt-detail");
+}
+
 /* ---------------------------------------------------------------
-   15. RENDER: CASE BOARD
+   16. RENDER: CASE BOARD
    --------------------------------------------------------------- */
 const CASE_STAGES = ["Open","Under Review","Action Required","Resolved"];
- 
+const CASE_PROCESS = [
+  "CEO announces / employee reports a concern",
+  "HR Staff receives it",
+  "HR Generalist reviews & creates the case",
+  "\uD83D\uDD34 OPEN",
+  "HR Staff schedules meeting/mediation",
+  "HR Consultant handles the intervention",
+  "HR Analyst documents the case",
+  "Department Head recommends action",
+  "HR Conference",
+  "CEO makes the final decision",
+  "Project Manager implements it",
+  "\uD83D\uDFE2 RESOLVED",
+];
+
 function renderCases(){
+  $("#case-process-flow").innerHTML = CASE_PROCESS.map((s,i)=>{
+    const cls = s.includes("OPEN") ? "hot" : s.includes("RESOLVED") ? "done" : "";
+    return `<span class="step-chip ${cls}">${s}</span>` + (i < CASE_PROCESS.length-1 ? `<span class="step-arrow">&rarr;</span>` : "");
+  }).join("");
+
   const term = ($("#case-search").value || "").toLowerCase();
   const wrap = $("#case-kanban");
   wrap.innerHTML = CASE_STAGES.map(stage=>{
@@ -698,10 +956,10 @@ function renderCases(){
         </div>`).join("")}
     </div>`;
   }).join("");
- 
+
   $all("[data-case]", wrap).forEach(card=> card.addEventListener("click", ()=> openCase(card.dataset.case)));
 }
- 
+
 function openCase(number){
   const c = DATA.cases.find(x=>x.number===number);
   if(!c) return;
@@ -722,7 +980,7 @@ function openCase(number){
       ${["Consultation","Interview","Mediation","Policy Review"].map(a=>`<button class="btn btn-ghost btn-sm" data-caseaction="${a}">${a}</button>`).join("")}
       ${nextStage ? `<button class="btn btn-primary btn-sm" data-advancecase="${nextStage}">Move to ${nextStage}</button>` : ""}
     </div>`;
- 
+
   $all("[data-caseaction]").forEach(btn=> btn.addEventListener("click", ()=>{
     c.history.push({ text:`${btn.dataset.caseaction} logged`, time:"Just now" });
     toast(`${btn.dataset.caseaction} logged for ${c.number}`);
@@ -736,12 +994,24 @@ function openCase(number){
     closeModals();
     renderCases();
   });
- 
+
   openModal("modal-case");
 }
- 
+
 /* ---------------------------------------------------------------
-   16. RENDER: PROFILE
+   17. RENDER: EMPLOYEE WELL-BEING
+   --------------------------------------------------------------- */
+function renderWellbeing(){
+  $all("[data-wbtab]").forEach(t=> t.classList.toggle("active", t.dataset.wbtab === STATE.wbTab));
+  ["procedures","grievance","conflict","wellbeing","engagement"].forEach(tab=>{
+    $(`#wb-${tab}`).classList.toggle("hidden", STATE.wbTab !== tab);
+  });
+  $("#wb-procedures-list").innerHTML = DATA.wellbeingProcedures.map(p=>`<li>${p}</li>`).join("");
+  $("#wb-initiatives-list").innerHTML = DATA.wellbeingInitiatives.map(p=>`<li>${p}</li>`).join("");
+}
+
+/* ---------------------------------------------------------------
+   18. RENDER: PROFILE
    --------------------------------------------------------------- */
 function renderProfile(){
   const u = DATA.users[STATE.role];
@@ -751,7 +1021,7 @@ function renderProfile(){
   $("#profile-status").textContent = emp.status || "Active";
   $("#profile-status").className = "badge " + statusBadgeClass(emp.status || "Active");
   $("#profile-avatar").textContent = u.initials;
- 
+
   $("#profile-details").innerHTML = `
     <div><dt>Employee ID</dt><dd>${u.empId}</dd></div>
     <div><dt>Department</dt><dd>${u.dept}</dd></div>
@@ -759,16 +1029,31 @@ function renderProfile(){
     <div><dt>Supervisor</dt><dd>${(emp.supervisor)||"Bien Santos"}</dd></div>
     <div><dt>Employment type</dt><dd>Regular</dd></div>
     <div><dt>Date hired</dt><dd>${u.empId.slice(3,7)}-03-14</dd></div>`;
- 
+
   $("#profile-docs").innerHTML = [
     "Certificate of Employment.pdf","2026 Payslips (Jan\u2013Aug).zip","Signed Employment Contract.pdf","Company ID Photo.jpg",
   ].map(d=>`<li><span class="dot-ic"></span><div class="act-text"><strong>${d}</strong><span class="act-time">Available for download</span></div></li>`).join("");
- 
+
   $("#profile-edit-btn").onclick = ()=> toast("Profile editing would open here in the full system.");
 }
- 
+
 /* ---------------------------------------------------------------
-   17. RENDER: BACKUP
+   19. RENDER: ARCHIVE
+   --------------------------------------------------------------- */
+function renderArchive(){
+  $("#archive-doc-link").href = DATA.googleDocUrl;
+  const term = ($("#archive-search").value || "").toLowerCase();
+  const rows = DATA.archiveDocs.filter(d=> !term || d.title.toLowerCase().includes(term) || d.type.toLowerCase().includes(term));
+  $("#archive-list").innerHTML = rows.map(d=>`
+    <div class="archive-row">
+      <div class="archive-icon">${d.type.slice(0,2).toUpperCase()}</div>
+      <div class="archive-meta"><strong>${d.title}</strong><span>${d.type} &middot; uploaded by ${d.by} &middot; ${d.date}</span></div>
+      <span class="badge badge-green">${d.type}</span>
+    </div>`).join("") || `<p style="color:var(--ink-soft);">No documents match your search.</p>`;
+}
+
+/* ---------------------------------------------------------------
+   20. RENDER: BACKUP
    --------------------------------------------------------------- */
 function renderBackup(){
   $("#backup-history-body").innerHTML = DATA.backupHistory.map(b=>`
@@ -776,23 +1061,31 @@ function renderBackup(){
   $("#backup-logs").innerHTML = DATA.backupLogs.map(l=>`
     <li><span class="dot-ic"></span><div class="act-text"><strong>${l.text}</strong><span class="act-time">${l.time}</span></div></li>`).join("");
 }
- 
+
 /* ---------------------------------------------------------------
-   18. RENDER: SETTINGS
+   21. RENDER: SETTINGS
    --------------------------------------------------------------- */
 function renderSettings(){
   const u = DATA.users[STATE.role];
   $("#settings-name").value = u.name;
   $("#settings-email").value = `${u.name.toLowerCase().replace(/\s+/g,'.')}@nimblypod.com`;
 }
- 
+
 /* ---------------------------------------------------------------
-   19. CANVAS CHARTS (dependency-free)
+   22. CANVAS CHARTS (dependency-free)
    --------------------------------------------------------------- */
 function prepCanvas(id){
   const canvas = document.getElementById(id);
+  const parent = canvas.parentElement;
+  const parentStyle = getComputedStyle(parent);
+  const padL = parseFloat(parentStyle.paddingLeft) || 0;
+  const padR = parseFloat(parentStyle.paddingRight) || 0;
   const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.parentElement.clientWidth - 4;
+  // Subtract the parent panel's own padding so the canvas fits inside
+  // its content box instead of overflowing past it — this was the
+  // cause of the whole dashboard scrolling left/right on the
+  // HR Analytics view.
+  const cssW = Math.max(parent.clientWidth - padL - padR - 2, 50);
   const cssH = 220;
   canvas.style.width = cssW + "px";
   canvas.style.height = cssH + "px";
@@ -802,7 +1095,7 @@ function prepCanvas(id){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   return { ctx, w:cssW, h:cssH };
 }
- 
+
 function drawBarChart(id, labels, values, color){
   const { ctx, w, h } = prepCanvas(id);
   ctx.clearRect(0,0,w,h);
@@ -811,8 +1104,8 @@ function drawBarChart(id, labels, values, color){
   const max = Math.max(...values) * 1.2;
   const barW = plotW / values.length * 0.55;
   const gap = plotW / values.length;
- 
-  ctx.strokeStyle = "#D9E8DD"; ctx.lineWidth = 1;
+
+  ctx.strokeStyle = "#CCEBDC"; ctx.lineWidth = 1;
   for(let i=0;i<=3;i++){
     const y = padT + plotH - (plotH*i/3);
     ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
@@ -831,17 +1124,17 @@ function drawBarChart(id, labels, values, color){
     ctx.lineTo(x, y+barH);
     ctx.closePath();
     ctx.fill();
- 
-    ctx.fillStyle = "#4B5E54";
+
+    ctx.fillStyle = "#536860";
     ctx.font = "11px 'Public Sans', sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(labels[i], x+barW/2, h-8);
-    ctx.fillStyle = "#16241D";
+    ctx.fillStyle = "#101A15";
     ctx.font = "600 11px 'Public Sans', sans-serif";
     ctx.fillText(v, x+barW/2, y-6);
   });
 }
- 
+
 function drawLineChart(id, labels, series){
   const { ctx, w, h } = prepCanvas(id);
   ctx.clearRect(0,0,w,h);
@@ -850,15 +1143,15 @@ function drawLineChart(id, labels, series){
   const allVals = series.flatMap(s=>s.values);
   const max = Math.max(...allVals) * 1.15, min = Math.min(...allVals) * 0.85;
   const stepX = plotW / (labels.length-1);
- 
-  ctx.strokeStyle = "#D9E8DD"; ctx.lineWidth = 1;
+
+  ctx.strokeStyle = "#CCEBDC"; ctx.lineWidth = 1;
   for(let i=0;i<=3;i++){
     const y = padT + plotH - (plotH*i/3);
     ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
   }
-  ctx.fillStyle = "#4B5E54"; ctx.font = "11px 'Public Sans', sans-serif"; ctx.textAlign="center";
+  ctx.fillStyle = "#536860"; ctx.font = "11px 'Public Sans', sans-serif"; ctx.textAlign="center";
   labels.forEach((l,i)=> ctx.fillText(l, padL + stepX*i, h-8));
- 
+
   series.forEach(s=>{
     ctx.strokeStyle = s.color; ctx.lineWidth = 2.4; ctx.beginPath();
     s.values.forEach((v,i)=>{
@@ -874,17 +1167,17 @@ function drawLineChart(id, labels, series){
       ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
     });
   });
- 
+
   const lx = w - padR - 120;
   series.forEach((s,i)=>{
     const ly = padT + i*16;
     ctx.fillStyle = s.color;
     ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#4B5E54"; ctx.textAlign = "left"; ctx.font = "11px 'Public Sans', sans-serif";
+    ctx.fillStyle = "#536860"; ctx.textAlign = "left"; ctx.font = "11px 'Public Sans', sans-serif";
     ctx.fillText(s.name, lx+9, ly+4);
   });
 }
- 
+
 function drawDonutChart(id, labels, values, colors){
   const { ctx, w, h } = prepCanvas(id);
   ctx.clearRect(0,0,w,h);
@@ -904,14 +1197,14 @@ function drawDonutChart(id, labels, values, colors){
   ctx.globalCompositeOperation = "destination-out";
   ctx.beginPath(); ctx.arc(cx,cy,rInner,0,Math.PI*2); ctx.fill();
   ctx.globalCompositeOperation = "source-over";
-  ctx.fillStyle = "#16241D"; ctx.textAlign = "center"; ctx.font = "600 15px 'Fraunces', serif";
+  ctx.fillStyle = "#101A15"; ctx.textAlign = "center"; ctx.font = "600 15px 'Fraunces', serif";
   ctx.fillText(total, cx, cy+5);
-  ctx.font = "10px 'Public Sans', sans-serif"; ctx.fillStyle = "#4B5E54";
+  ctx.font = "10px 'Public Sans', sans-serif"; ctx.fillStyle = "#536860";
   ctx.fillText("candidates", cx, cy+19);
 }
- 
+
 /* ---------------------------------------------------------------
-   20. MODALS
+   23. MODALS
    --------------------------------------------------------------- */
 function openModal(id){
   closeModals();
@@ -922,38 +1215,37 @@ function closeModals(){
   $("#modal-overlay").classList.add("hidden");
   $all(".modal").forEach(m=>m.classList.remove("open"));
 }
- 
+
 function initModals(){
   $("#modal-overlay").addEventListener("click", e=>{ if(e.target.id==="modal-overlay") closeModals(); });
   $all("[data-close]").forEach(b=> b.addEventListener("click", closeModals));
- 
-  $("#new-request-btn").addEventListener("click", ()=> openModal("modal-request"));
+
+  $("#new-request-btn").addEventListener("click", ()=> openRequestModal());
   $("#request-form").addEventListener("submit", e=>{
     e.preventDefault();
     const type = $("#req-type").value;
     DATA.activity.unshift({ text:`New request submitted: ${type}`, time:"Just now" });
-    KPI.openRequests++;
     toast("Request submitted to HR");
     closeModals();
     $("#request-form").reset();
     if(STATE.currentView === "dashboard") renderDashboard();
   });
- 
+
   $("#appt-new-btn").addEventListener("click", ()=> openModal("modal-appointment"));
   $("#appointment-form").addEventListener("submit", e=>{
     e.preventDefault();
     const id = "AT-" + (500 + DATA.appointments.length + 1);
     DATA.appointments.unshift({
-      id, employee: DATA.users[STATE.role].name, hr: $("#appt-hr").value,
+      id, employee: DATA.users[STATE.role].name, hr: $("#appt-hr").value, type: $("#appt-type").value,
       date: $("#appt-date").value || "TBD", time: $("#appt-time").value || "TBD",
-      reason: $("#appt-reason").value, status:"Scheduled",
+      reason: $("#appt-reason").value, status:"Pending Review", notes: $("#appt-notes").value || "", outcome:"",
     });
-    toast("Appointment booked");
+    toast("Appointment request sent to HR for review");
     closeModals();
     $("#appointment-form").reset();
     if(STATE.currentView === "appointments") renderAppointments();
   });
- 
+
   $("#case-new-btn").addEventListener("click", ()=> openModal("modal-case-new"));
   $("#case-new-form").addEventListener("submit", e=>{
     e.preventDefault();
@@ -968,7 +1260,7 @@ function initModals(){
     $("#case-new-form").reset();
     if(STATE.currentView === "cases") renderCases();
   });
- 
+
   $("#ann-new-btn").addEventListener("click", ()=> openModal("modal-ann-new"));
   $("#ann-new-form").addEventListener("submit", e=>{
     e.preventDefault();
@@ -983,26 +1275,47 @@ function initModals(){
     $("#ann-new-form").reset();
     if(STATE.currentView === "announcements") renderAnnouncements();
   });
+
+  $("#engagement-form").addEventListener("submit", e=>{
+    e.preventDefault();
+    DATA.activity.unshift({ text:`Employee engagement feedback submitted by ${DATA.users[STATE.role].name}`, time:"Just now" });
+    toast("Thanks — your feedback was sent to HR");
+    $("#engagement-form").reset();
+  });
 }
- 
+
+function openRequestModal(presetType){
+  if(presetType) $("#req-type").value = presetType;
+  openModal("modal-request");
+}
+
 /* ---------------------------------------------------------------
-   21. MISC WIRING
+   24. MISC WIRING
    --------------------------------------------------------------- */
 function initChrome(){
   $("#logout-btn").addEventListener("click", logout);
   $("#hamburger").addEventListener("click", ()=> $("#sidebar").classList.toggle("open"));
   $("#notif-btn").addEventListener("click", ()=> toast(`You have ${DATA.notifications.length} notifications`));
- 
-  $all("[data-dirtab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.dirTab = t.dataset.dirtab; renderDirectory(); }));
-  $("#dir-search").addEventListener("input", renderDirectory);
-  $("#dir-filter-dept").addEventListener("change", renderDirectory);
-  $("#dir-filter-status").addEventListener("change", renderDirectory);
- 
+
+  $all("[data-orgtab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.orgTab = t.dataset.orgtab; renderOrganization(); }));
+  $("#dir-search").addEventListener("input", renderEmployeeDirectory);
+  $("#dir-filter-dept").addEventListener("change", renderEmployeeDirectory);
+  $("#dir-filter-status").addEventListener("change", renderEmployeeDirectory);
+
+  $all("[data-rectab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.recruitTab = t.dataset.rectab; renderRecruitment(); }));
   $all("[data-learntab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.learnTab = t.dataset.learntab; renderLearning(); }));
- 
+  $all("[data-appttab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.apptTab = t.dataset.appttab; renderAppointments(); }));
+  $all("[data-wbtab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.wbTab = t.dataset.wbtab; renderWellbeing(); }));
+
   $("#appt-filter-status").addEventListener("change", renderAppointments);
   $("#case-search").addEventListener("input", renderCases);
- 
+  $("#archive-search").addEventListener("input", renderArchive);
+
+  $("#wb-grievance-btn").addEventListener("click", ()=>{ $("#case-category").value = "Grievance"; openModal("modal-case-new"); });
+  $("#wb-conflict-btn").addEventListener("click", ()=>{ $("#appt-reason").value = "Conflict mediation request"; openModal("modal-appointment"); });
+  $("#wb-wellbeing-btn").addEventListener("click", ()=> openRequestModal("Well-being support"));
+  $("#archive-upload-btn").addEventListener("click", ()=> toast("Document uploaded to the Archive"));
+
   $("#btn-sync").addEventListener("click", ()=> toast("Sync started \u2014 records are up to date"));
   $("#btn-backup").addEventListener("click", ()=>{
     DATA.backupHistory.unshift({ date:"Just now", type:"Manual", size:"1.4 GB", status:"Success" });
@@ -1012,20 +1325,24 @@ function initChrome(){
   });
   $("#btn-restore").addEventListener("click", ()=> toast("Restore initiated from latest backup"));
   $("#btn-download").addEventListener("click", ()=> toast("Preparing backup archive for download\u2026"));
- 
+
   $("#settings-save").addEventListener("click", ()=> toast("Settings saved"));
- 
+
+  let resizeTimer = null;
   window.addEventListener("resize", ()=>{
-    if(STATE.currentView === "analytics") renderAnalytics();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(()=>{
+      if(STATE.currentView === "analytics") renderAnalytics();
+    }, 120);
   });
 }
- 
+
 /* ---------------------------------------------------------------
-   22. INIT
+   25. INIT
    --------------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", ()=>{
+  applyLogo();
   initAuth();
   initModals();
   initChrome();
 });
- 
