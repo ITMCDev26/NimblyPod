@@ -185,7 +185,7 @@
     <header class="topbar">
       <button class="hamburger" id="hamburger" aria-label="Toggle navigation">&#9776;</button>
       <div class="topbar-title">
-        <h1 id="view-title">Dashboard</h1>
+        <h1 id="view-title">Homepage</h1>
         <p id="view-subtitle">Welcome back to your pod.</p>
       </div>
       <div class="topbar-actions">
@@ -209,7 +209,7 @@
       <section class="view" id="view-dashboard">
         <div class="welcome-banner">
           <div class="welcome-copy">
-            <p class="eyebrow-free"><img class="welcome-logo" data-logo alt="Nimbly Pod logo" />Nimbly Pod</p>
+            <p class="eyebrow-free">Nimbly Pod &middot; Homepage</p>
             <h2>Growing people. Strengthening organizations.</h2>
             <p class="welcome-msg">Everything your HR journey touches &mdash; requests, cases, learning, people &mdash; lives here now, in one place.</p>
             <div class="vm-grid">
@@ -217,6 +217,7 @@
               <div class="vm-box"><strong>Mission</strong><p>To bridge global businesses with agile, high-performing remote talent through cloud-driven efficiency, autonomous pod structures, and seamless workforce solutions.</p></div>
             </div>
           </div>
+          <img class="welcome-logo-side" data-logo alt="Nimbly Pod logo" />
           <svg class="welcome-art" viewBox="0 0 240 200" aria-hidden="true">
             <use href="#sprout-path" x="20" y="0" transform="scale(0.9)"></use>
           </svg>
@@ -257,10 +258,12 @@
         </div>
 
         <div id="org-orgchart" class="panel">
+          <div class="chip-filters" id="org-chart-deptbar" style="margin-bottom:16px;"></div>
           <div class="org-chart" id="org-chart"></div>
         </div>
 
         <div id="org-reporting" class="panel hidden">
+          <div class="chip-filters" id="org-reporting-deptbar" style="margin-bottom:16px;"></div>
           <table class="data-table">
             <thead><tr><th>Employee</th><th>Position</th><th>Reports to</th></tr></thead>
             <tbody id="org-reporting-body"></tbody>
@@ -269,7 +272,7 @@
 
         <div id="org-deptdir" class="panel hidden">
           <table class="data-table">
-            <thead><tr><th>Department</th><th>Primary responsibility</th></tr></thead>
+            <thead><tr><th>Department</th><th>Primary responsibility</th><th>Local #</th><th>Department email</th></tr></thead>
             <tbody id="org-deptdir-body"></tbody>
           </table>
         </div>
@@ -286,10 +289,11 @@
             </select>
             <a class="btn btn-ghost btn-sm" id="dir-sheet-link" href="#" target="_blank" rel="noopener">Open in Google Sheets</a>
           </div>
+          <p class="panel-note" style="margin-bottom:14px;">This table mirrors our Google Sheet roster. <span id="dir-edit-note"></span> Live two-way sync with Sheets needs a backend connector, so edits here stay local to this prototype for now.</p>
           <div class="panel">
             <table class="data-table">
               <thead><tr>
-                <th>Employee</th><th>Employee ID</th><th>Department</th><th>Position</th><th>Supervisor</th><th>Status</th>
+                <th>Employee</th><th>Employee ID</th><th>Department</th><th>Position</th><th>Local #</th><th>Dept. email</th><th>Department Head</th><th>Status</th>
               </tr></thead>
               <tbody id="dir-table-body"></tbody>
             </table>
@@ -542,8 +546,9 @@
             <dl class="detail-list" id="profile-details"></dl>
           </div>
           <div class="panel">
-            <div class="panel-head"><h3>Documents</h3></div>
-            <ul class="activity-list" id="profile-docs"></ul>
+            <div class="panel-head"><h3>Google Sheets record</h3></div>
+            <p class="panel-note" style="margin-bottom:14px;">Your official employment record lives in the company roster sheet.</p>
+            <a class="btn btn-ghost btn-sm" id="profile-sheet-link" href="#" target="_blank" rel="noopener">Open in Google Sheets</a>
           </div>
         </div>
       </section>

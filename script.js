@@ -17,12 +17,17 @@ const CONFIG = {
    1. DUMMY DATA
    --------------------------------------------------------------- */
 const DATA = {
+  perfKpis: [
+    { label:"Avg. rating (Q3)", value:"4.2 / 5" },
+    { label:"Goals on track", value:"87%" },
+    { label:"Recognitions this month", value:"11" },
+  ],
 
   users: {
-    employee: { name:"Juno Dela Cruz", role:"Employee", empId:"NP-2021-0142", dept:"Customer Support", position:"Team Lead", initials:"JD" },
-    hr:       { name:"Marisol Reyes",  role:"HR Staff",  empId:"NP-2019-0031", dept:"Human Resources", position:"HR Generalist", initials:"MR" },
-    hrhead:   { name:"Bien Santos",    role:"HR Head",   empId:"NP-2015-0008", dept:"Human Resources", position:"Head of HR", initials:"BS" },
-    admin:    { name:"Admin Root",     role:"Administrator", empId:"NP-2012-0001", dept:"IT & Systems", position:"System Administrator", initials:"AR" },
+    employee: { name:"Juno Dela Cruz", role:"Employee", empId:"NP-2021-0142", dept:"Employee Relations & Well-being", position:"HR Staff", initials:"JD" },
+    hr:       { name:"Marisol Reyes",  role:"HR Staff",  empId:"NP-2019-0031", dept:"HR Operations, Analytics & Policy", position:"HR Generalist", initials:"MR" },
+    hrhead:   { name:"Bien Santos",    role:"HR Head",   empId:"NP-2015-0008", dept:"HR Operations, Analytics & Policy", position:"Department Head", initials:"BS" },
+    admin:    { name:"Admin Root",     role:"Administrator", empId:"NP-2012-0001", dept:"HR Operations, Analytics & Policy", position:"Project Manager", initials:"AR" },
   },
 
   vision:"To become an exceptional company in providing efficient services and a workplace that prioritizes its employees, encouraging them to grow alongside the company and beyond.",
@@ -38,7 +43,15 @@ const DATA = {
 
   communicationsOfficerNote:"Talent postings are written and published by the Communications Officer, Talent Acquisition &amp; Workforce Planning.",
 
-  departments: ["Customer Support","Operations","Workforce Management","IT & Systems","Human Resources","Finance","Quality Assurance"],
+  departments: ["Talent Acquisition & Workforce Planning","Learning, Training & Development","Performance & Rewards","Employee Relations & Well-being","HR Operations, Analytics & Policy"],
+
+  deptInfo: {
+    "Talent Acquisition & Workforce Planning": { local:"Local 02", email:"talentacquisition@nimblypod.com", short:"Talent Acq." },
+    "Learning, Training & Development": { local:"Local 03", email:"learninganddev@nimblypod.com", short:"L&D" },
+    "Performance & Rewards": { local:"Local 04", email:"performancerewards@nimblypod.com", short:"Perf. & Rewards" },
+    "Employee Relations & Well-being": { local:"Local 05", email:"erwb@nimblypod.com", short:"ER & WB" },
+    "HR Operations, Analytics & Policy": { local:"Local 06", email:"hrops@nimblypod.com", short:"HR Ops" },
+  },
 
   hrDepartments: [
     { name:"Talent Acquisition & Workforce Planning", resp:"Recruitment, selection, manpower planning, onboarding" },
@@ -62,21 +75,27 @@ const DATA = {
   googleSheetUrl:"https://docs.google.com/spreadsheets/d/18J1tjoRsoAgdy9nhEhekSO1jnMHTcxUa7a-QiyKUVe8/edit?usp=drivesdk",
   googleDocUrl:"https://docs.google.com/document/d/1BRt8wJbG6IZHO0YtOveitAP6LDxwrZle379iNqynEH4/edit?usp=drivesdk",
 
+  // "supervisor" holds the employee's Department Head (label shown to users is "Department Head").
   employees: [
-    { id:"NP-2021-0142", name:"Juno Dela Cruz", dept:"Customer Support", position:"Team Lead", supervisor:"Bien Santos", status:"Active" },
-    { id:"NP-2022-0087", name:"Aira Bautista", dept:"Customer Support", position:"CSR II", supervisor:"Juno Dela Cruz", status:"Active" },
-    { id:"NP-2023-0114", name:"Miko Villareal", dept:"Customer Support", position:"CSR I", supervisor:"Juno Dela Cruz", status:"Probationary" },
-    { id:"NP-2020-0066", name:"Cassy Uy", dept:"Operations", position:"Ops Supervisor", supervisor:"Bien Santos", status:"Active" },
-    { id:"NP-2019-0031", name:"Marisol Reyes", dept:"Human Resources", position:"HR Generalist", supervisor:"Bien Santos", status:"Active" },
-    { id:"NP-2021-0055", name:"Kyle Fernandez", dept:"Human Resources", position:"HR Coordinator", supervisor:"Marisol Reyes", status:"Active" },
-    { id:"NP-2018-0022", name:"Denise Ocampo", dept:"Workforce Management", position:"WFM Analyst", supervisor:"Cassy Uy", status:"On Leave" },
-    { id:"NP-2022-0099", name:"Rhys Abad", dept:"IT & Systems", position:"IT Support", supervisor:"Admin Root", status:"Active" },
-    { id:"NP-2012-0001", name:"Admin Root", dept:"IT & Systems", position:"System Administrator", supervisor:"Bien Santos", status:"Active" },
-    { id:"NP-2020-0041", name:"Patrice Lim", dept:"Finance", position:"Payroll Officer", supervisor:"Bien Santos", status:"Active" },
-    { id:"NP-2023-0130", name:"Noel Trinidad", dept:"Quality Assurance", position:"QA Analyst", supervisor:"Cassy Uy", status:"Active" },
-    { id:"NP-2015-0008", name:"Bien Santos", dept:"Human Resources", position:"Head of HR", supervisor:"CEO — Rosario Viray", status:"Active" },
-    { id:"NP-2024-0151", name:"Sam Ilagan", dept:"Customer Support", position:"CSR I", supervisor:"Juno Dela Cruz", status:"Probationary" },
-    { id:"NP-2017-0019", name:"Grace Manansala", dept:"Operations", position:"Ops Manager", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2020-0066", name:"Cassy Uy", dept:"Talent Acquisition & Workforce Planning", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+    { id:"NP-2022-0087", name:"Aira Bautista", dept:"Talent Acquisition & Workforce Planning", position:"Communications Officer", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2023-0114", name:"Miko Villareal", dept:"Talent Acquisition & Workforce Planning", position:"HR Analyst", supervisor:"Cassy Uy", status:"Probationary" },
+
+    { id:"NP-2021-0055", name:"Kyle Fernandez", dept:"Learning, Training & Development", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+    { id:"NP-2018-0022", name:"Denise Ocampo", dept:"Learning, Training & Development", position:"HR Consultant", supervisor:"Kyle Fernandez", status:"On Leave" },
+    { id:"NP-2023-0130", name:"Noel Trinidad", dept:"Learning, Training & Development", position:"HR Staff", supervisor:"Kyle Fernandez", status:"Active" },
+
+    { id:"NP-2020-0041", name:"Patrice Lim", dept:"Performance & Rewards", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+    { id:"NP-2017-0019", name:"Grace Manansala", dept:"Performance & Rewards", position:"HR Analyst", supervisor:"Patrice Lim", status:"Active" },
+    { id:"NP-2024-0151", name:"Sam Ilagan", dept:"Performance & Rewards", position:"HR Staff", supervisor:"Patrice Lim", status:"Probationary" },
+
+    { id:"NP-2021-0142", name:"Juno Dela Cruz", dept:"Employee Relations & Well-being", position:"HR Staff", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2022-0099", name:"Rhys Abad", dept:"Employee Relations & Well-being", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+
+    { id:"NP-2015-0008", name:"Bien Santos", dept:"HR Operations, Analytics & Policy", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+    { id:"NP-2019-0031", name:"Marisol Reyes", dept:"HR Operations, Analytics & Policy", position:"HR Generalist", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2012-0001", name:"Admin Root", dept:"HR Operations, Analytics & Policy", position:"Project Manager", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2026-0201", name:"M. Sheina", dept:"HR Operations, Analytics & Policy", position:"Policy Specialist", supervisor:"Bien Santos", status:"Active" },
   ],
 
   activity: [
@@ -251,7 +270,7 @@ const DATA = {
 };
 
 const KPI = {
-  totalEmployees: DATA.employees.length,
+  totalEmployees: 52,
   pendingApprovals: 3,
   upcomingAppointments: DATA.appointments.filter(a=>a.status==="Pending Review" || a.status==="Accepted").length,
   newHires: 14,
@@ -269,6 +288,8 @@ const STATE = {
   role: "employee",
   currentView: "dashboard",
   orgTab: "orgchart",
+  orgChartDept: "All",
+  reportingDept: "All",
   recruitTab: "talent",
   learnTab: "employee",
   annFilter: "All",
@@ -280,7 +301,7 @@ const STATE = {
    3. NAV CONFIG
    --------------------------------------------------------------- */
 const NAV_MAIN = [
-  { id:"dashboard",     label:"Dashboard",             icon:"dashboard",     roles:"all" },
+  { id:"dashboard",     label:"Homepage",              icon:"dashboard",     roles:"all" },
   { id:"organization",  label:"Organization",          icon:"organization",  roles:"all" },
   { id:"analytics",     label:"HR Analytics",          icon:"analytics",     roles:["hr","hrhead","admin"] },
   { id:"performance",   label:"Performance",           icon:"performance",   roles:"all" },
@@ -307,7 +328,7 @@ const NAV_HR = [
 ];
 
 const VIEW_META = {
-  dashboard:     ["Dashboard", "Welcome back to your pod."],
+  dashboard:     ["Homepage", "Welcome back to your pod."],
   organization:  ["Organization", "Structure, departments, people, and roles."],
   analytics:     ["HR Analytics", "Headcount, turnover, and hiring at a glance."],
   performance:   ["Performance", "Goals, ratings, and recognition."],
@@ -518,10 +539,16 @@ function renderDashboard(){
   const activeCases = DATA.cases.filter(c=>c.status!=="Resolved").length;
   const kpis = [
     { label:"Total employees", value:KPI.totalEmployees, delta:"+3 this month", up:true },
-    { label:"Active cases", value:activeCases, delta:"awaiting resolution", up:false },
-    { label:"Pending approvals", value:KPI.pendingApprovals, delta:"awaiting HR Head", up:false },
-    { label:"Upcoming appointments", value:KPI.upcomingAppointments, delta:"this week", up:true },
   ];
+  // Active cases, pending approvals, and upcoming appointments are HR/CEO-only —
+  // employees don't see caseload or approval-queue data on their homepage.
+  if(isHrRole()){
+    kpis.push(
+      { label:"Active cases", value:activeCases, delta:"awaiting resolution", up:false },
+      { label:"Pending approvals", value:KPI.pendingApprovals, delta:"awaiting HR Head", up:false },
+      { label:"Upcoming appointments", value:KPI.upcomingAppointments, delta:"this week", up:true },
+    );
+  }
   $("#dash-kpis").innerHTML = kpis.map(k=>`
     <div class="kpi-card">
       <div class="kpi-label">${k.label}</div>
@@ -566,37 +593,62 @@ function syncOrgTabs(){
   });
 }
 
+function deptChipBar(containerId, activeVal, onPick){
+  const chips = ["All", ...DATA.departments];
+  $(containerId).innerHTML = chips.map(d=>`<button class="chip ${activeVal===d?'active':''}" data-deptchip="${d}">${d==="All"?"All departments":DATA.deptInfo[d].short}</button>`).join("");
+  $all("[data-deptchip]", $(containerId)).forEach(chip=> chip.addEventListener("click", ()=> onPick(chip.dataset.deptchip)));
+}
+
 function buildOrgChart(){
+  deptChipBar("#org-chart-deptbar", STATE.orgChartDept, (d)=>{ STATE.orgChartDept = d; buildOrgChart(); });
   const ceo = "Rosario Viray";
-  const level1 = DATA.employees.filter(e=>e.supervisor === ceo);
+  const scope = STATE.orgChartDept === "All" ? DATA.employees : DATA.employees.filter(e=>e.dept===STATE.orgChartDept);
   const html = [];
   html.push(`<div class="org-row"><div class="org-node top"><strong>${ceo}</strong><span>Chief Executive Officer</span></div></div>`);
   html.push(`<div class="org-connector"></div>`);
-  html.push(`<div class="org-row">` + level1.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
-  const level2 = DATA.employees.filter(e=> level1.some(l=>l.name===e.supervisor));
-  if(level2.length){
-    html.push(`<div class="org-connector"></div>`);
-    html.push(`<div class="org-row">` + level2.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
+
+  if(STATE.orgChartDept === "All"){
+    const heads = scope.filter(e=>e.position==="Department Head");
+    html.push(`<div class="org-row">` + heads.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position} &middot; ${DATA.deptInfo[m.dept].short}</span></div>`).join("") + `</div>`);
+    const rest = scope.filter(e=> heads.some(h=>h.name===e.supervisor));
+    if(rest.length){
+      html.push(`<div class="org-connector"></div>`);
+      html.push(`<div class="org-row">` + rest.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
+    }
+  } else {
+    const head = scope.find(e=>e.position==="Department Head");
+    const rest = scope.filter(e=> e.position !== "Department Head");
+    if(head) html.push(`<div class="org-row"><div class="org-node"><strong>${head.name}</strong><span>${head.position}</span></div></div>`);
+    if(rest.length){
+      html.push(`<div class="org-connector"></div>`);
+      html.push(`<div class="org-row">` + rest.map(m=>`<div class="org-node"><strong>${m.name}</strong><span>${m.position}</span></div>`).join("") + `</div>`);
+    }
   }
   $("#org-chart").innerHTML = html.join("");
 }
 
 function renderReporting(){
-  $("#org-reporting-body").innerHTML = DATA.employees.map(e=>`
+  deptChipBar("#org-reporting-deptbar", STATE.reportingDept, (d)=>{ STATE.reportingDept = d; renderReporting(); });
+  const scope = STATE.reportingDept === "All" ? DATA.employees : DATA.employees.filter(e=>e.dept===STATE.reportingDept);
+  $("#org-reporting-body").innerHTML = scope.map(e=>`
     <tr><td class="cell-name">${e.name}</td><td>${e.position}</td><td>${e.supervisor}</td></tr>`).join("");
 }
 
 function renderDeptDirectory(){
   $("#org-deptdir-body").innerHTML = DATA.hrDepartments.map(d=>`
-    <tr><td class="cell-name">${d.name}</td><td>${d.resp}</td></tr>`).join("");
+    <tr><td class="cell-name">${d.name}</td><td>${d.resp}</td><td>${DATA.deptInfo[d.name].local}</td><td>${DATA.deptInfo[d.name].email}</td></tr>`).join("");
 }
 
 function renderEmployeeDirectory(){
   const deptSel = $("#dir-filter-dept");
   if(!deptSel.dataset.built){
-    deptSel.innerHTML = `<option value="">All departments</option>` + DATA.departments.map(d=>`<option value="${d}">${d}</option>`).join("");
+    deptSel.innerHTML = `<option value="">All departments</option>` + DATA.departments.map(d=>`<option value="${d}">${DATA.deptInfo[d].short}</option>`).join("");
     deptSel.dataset.built = "1";
   }
+  $("#dir-edit-note").textContent = isHrRole()
+    ? "As HR, you can edit Department and Position inline below."
+    : "Department and Position are managed by HR.";
+
   const term = ($("#dir-search").value || "").toLowerCase();
   const dept = $("#dir-filter-dept").value;
   const status = $("#dir-filter-status").value;
@@ -608,15 +660,27 @@ function renderEmployeeDirectory(){
     return matchTerm && matchDept && matchStatus;
   });
 
+  const editable = isHrRole();
   $("#dir-table-body").innerHTML = rows.map(e=>`
-    <tr>
-      <td class="cell-name">${e.name}<span class="cell-sub">${e.position}</span></td>
+    <tr data-emprow="${e.id}">
+      <td class="cell-name">${e.name}</td>
       <td>${e.id}</td>
-      <td>${e.dept}</td>
-      <td>${e.position}</td>
+      <td>${editable ? `<select class="filter-select" data-editdept="${e.id}">${DATA.departments.map(d=>`<option value="${d}" ${d===e.dept?'selected':''}>${DATA.deptInfo[d].short}</option>`).join("")}</select>` : e.dept}</td>
+      <td>${editable ? `<select class="filter-select" data-editpos="${e.id}">${DATA.jobPositions.map(p=>`<option value="${p.title}" ${p.title===e.position?'selected':''}>${p.title}</option>`).join("")}</select>` : e.position}</td>
+      <td>${DATA.deptInfo[e.dept].local}</td>
+      <td style="white-space:nowrap;">${DATA.deptInfo[e.dept].email}</td>
       <td>${e.supervisor}</td>
       <td><span class="badge ${statusBadgeClass(e.status)}">${e.status}</span></td>
-    </tr>`).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">No employees match your filters.</td></tr>`;
+    </tr>`).join("") || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">No employees match your filters.</td></tr>`;
+
+  $all("[data-editdept]").forEach(sel=> sel.addEventListener("change", ()=>{
+    const emp = DATA.employees.find(x=>x.id===sel.dataset.editdept);
+    if(emp){ emp.dept = sel.value; toast(`${emp.name}'s department updated`); renderEmployeeDirectory(); }
+  }));
+  $all("[data-editpos]").forEach(sel=> sel.addEventListener("change", ()=>{
+    const emp = DATA.employees.find(x=>x.id===sel.dataset.editpos);
+    if(emp){ emp.position = sel.value; toast(`${emp.name}'s position updated`); renderEmployeeDirectory(); }
+  }));
 }
 
 function renderPositions(){
@@ -640,7 +704,7 @@ function renderAnalytics(){
     <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
 
   const deptCounts = DATA.departments.map(d=> DATA.employees.filter(e=>e.dept===d).length);
-  drawBarChart("chart-headcount", DATA.departments.map(d=>d.split(" ")[0]), deptCounts, "#17382A");
+  drawBarChart("chart-headcount", DATA.departments.map(d=>DATA.deptInfo[d].short), deptCounts, "#17382A");
 
   drawLineChart("chart-turnover",
     ["Apr","May","Jun","Jul","Aug","Sep"],
@@ -659,11 +723,21 @@ function renderAnalytics(){
    11. RENDER: PERFORMANCE
    --------------------------------------------------------------- */
 function renderPerformance(){
-  $("#perf-kpis").innerHTML = [
-    { label:"Avg. rating (Q3)", value:"4.2 / 5" },
-    { label:"Goals on track", value:"87%" },
-    { label:"Recognitions this month", value:"11" },
-  ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
+  const editable = isHrRole();
+  $("#perf-kpis").innerHTML = DATA.perfKpis.map((k,i)=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      ${editable
+        ? `<input class="kpi-value-input" data-perfkpi="${i}" value="${k.value}" />`
+        : `<div class="kpi-value">${k.value}</div>`}
+    </div>`).join("");
+
+  $all("[data-perfkpi]").forEach(input=>{
+    input.addEventListener("change", ()=>{
+      DATA.perfKpis[input.dataset.perfkpi].value = input.value;
+      toast(`${DATA.perfKpis[input.dataset.perfkpi].label} updated`);
+    });
+  });
 
   $("#perf-goals").innerHTML = DATA.goals.map(g=>`
     <div class="goal-item">
@@ -725,7 +799,6 @@ function renderKanbanRecruitment(){
           <div class="kan-meta">${c.position} &middot; ${c.id}</div>
           ${i < DATA.pipelineStages.length-1 ? `<button class="kan-advance" data-advance="${c.id}">Advance &rarr;</button>` : `<span class="badge badge-green">Onboarding</span>`}
         </div>`).join("")}
-      ${extra > 0 ? `<div class="kan-meta" style="text-align:center;padding:4px 0;">+${extra} more</div>` : ""}
     </div>`;
   }).join("");
 
@@ -1026,14 +1099,11 @@ function renderProfile(){
     <div><dt>Employee ID</dt><dd>${u.empId}</dd></div>
     <div><dt>Department</dt><dd>${u.dept}</dd></div>
     <div><dt>Position</dt><dd>${u.position}</dd></div>
-    <div><dt>Supervisor</dt><dd>${(emp.supervisor)||"Bien Santos"}</dd></div>
+    <div><dt>Department Head</dt><dd>${(emp.supervisor)||"Bien Santos"}</dd></div>
     <div><dt>Employment type</dt><dd>Regular</dd></div>
-    <div><dt>Date hired</dt><dd>${u.empId.slice(3,7)}-03-14</dd></div>`;
+    <div><dt>Date hired</dt><dd>August 29, 2026</dd></div>`;
 
-  $("#profile-docs").innerHTML = [
-    "Certificate of Employment.pdf","2026 Payslips (Jan\u2013Aug).zip","Signed Employment Contract.pdf","Company ID Photo.jpg",
-  ].map(d=>`<li><span class="dot-ic"></span><div class="act-text"><strong>${d}</strong><span class="act-time">Available for download</span></div></li>`).join("");
-
+  $("#profile-sheet-link").href = DATA.googleSheetUrl;
   $("#profile-edit-btn").onclick = ()=> toast("Profile editing would open here in the full system.");
 }
 
@@ -1077,18 +1147,15 @@ function renderSettings(){
 function prepCanvas(id){
   const canvas = document.getElementById(id);
   const parent = canvas.parentElement;
-  const parentStyle = getComputedStyle(parent);
-  const padL = parseFloat(parentStyle.paddingLeft) || 0;
-  const padR = parseFloat(parentStyle.paddingRight) || 0;
+  const style = getComputedStyle(parent);
+  const padL = parseFloat(style.paddingLeft) || 0;
+  const padR = parseFloat(style.paddingRight) || 0;
   const dpr = window.devicePixelRatio || 1;
-  // Subtract the parent panel's own padding so the canvas fits inside
-  // its content box instead of overflowing past it — this was the
-  // cause of the whole dashboard scrolling left/right on the
-  // HR Analytics view.
-  const cssW = Math.max(parent.clientWidth - padL - padR - 2, 50);
-  const cssH = 220;
+  const cssW = Math.max(60, parent.clientWidth - padL - padR - 2);
+  const cssH = window.innerWidth <= 480 ? 180 : 220;
   canvas.style.width = cssW + "px";
   canvas.style.height = cssH + "px";
+  canvas.style.maxWidth = "100%";
   canvas.width = cssW * dpr;
   canvas.height = cssH * dpr;
   const ctx = canvas.getContext("2d");
@@ -1328,12 +1395,8 @@ function initChrome(){
 
   $("#settings-save").addEventListener("click", ()=> toast("Settings saved"));
 
-  let resizeTimer = null;
   window.addEventListener("resize", ()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(()=>{
-      if(STATE.currentView === "analytics") renderAnalytics();
-    }, 120);
+    if(STATE.currentView === "analytics") renderAnalytics();
   });
 }
 
