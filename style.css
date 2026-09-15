@@ -188,9 +188,9 @@ textarea{ resize:vertical; }
   padding:22px 14px;
   position:sticky; top:0; height:100vh;
 }
-.sidebar-brand{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-size:19px; padding:4px 10px 26px; position:relative; }
+.sidebar-brand{ display:flex; align-items:center; justify-content:center; gap:9px; font-family:var(--font-display); font-size:19px; padding:4px 10px 26px; position:relative; text-align:center; }
 .sidebar-close{
-  display:none; margin-left:auto; background:rgba(255,255,255,.1); border:none; color:#fff;
+  display:none; position:absolute; right:10px; top:4px; background:rgba(255,255,255,.1); border:none; color:#fff;
   width:30px; height:30px; border-radius:8px; font-size:20px; line-height:1; cursor:pointer; flex:none;
 }
 .sidebar-close:hover{ background:rgba(255,255,255,.2); }

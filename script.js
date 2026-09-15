@@ -11,7 +11,94 @@ const CONFIG = {
   // company logo on the login screen, sidebar, and dashboard banner.
   // Example: "https://i.imgur.com/xxxxxxx.png"
   logoUrl: "https://i.imgur.com/aAPpqvq.png",
+
+  // Paste your deployed Apps Script Web App URL here (ends in /exec).
+  // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
+  apiUrl: "https://script.google.com/macros/s/AKfycbyG7F2nSO8pK6nm-1Qx6TcmY7cyLTDVaUymotgG5JEMqD6-58jlp-evded8aeVhbfn0/exec",
 };
+
+/* ---------------------------------------------------------------
+   0b. BACKEND API HELPERS (Google Sheet via Apps Script Web App)
+   --------------------------------------------------------------- */
+function apiConfigured(){ return !!CONFIG.apiUrl; }
+
+async function apiGet(action, params){
+  const url = new URL(CONFIG.apiUrl);
+  url.searchParams.set("action", action);
+  Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString());
+  return res.json();
+}
+
+async function apiPost(action, payload){
+  // text/plain avoids a CORS preflight request, which Apps Script web apps don't handle.
+  const res = await fetch(CONFIG.apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(Object.assign({ action }, payload)),
+  });
+  return res.json();
+}
+
+function roleLabel_(role){
+  return ({ employee:"Employee", hr:"HR Staff", hrhead:"HR Head", admin:"Administrator" })[role] || "Employee";
+}
+
+function initialsFrom_(name){
+  return (name || "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
+}
+
+function fmtDate_(v){
+  if (!v) return "";
+  const d = new Date(v);
+  if (isNaN(d)) return String(v);
+  return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
+
+function safeJSON_(str, fallback){
+  try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+// Pulls live data from the Google Sheet backend into the DATA object
+// that the rest of the app already renders from.
+async function loadBackendData(){
+  if (!apiConfigured()) return;
+  const res = await apiGet("getAll");
+  if (!res.ok){ toast("Couldn't load data from the sheet: " + res.error); return; }
+
+  DATA.announcements = (res.announcements || []).map(a => ({
+    id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
+    author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
+  })).reverse();
+
+  DATA.appointments = (res.appointments || []).map(a => ({
+    id: a.ID, employee: a.Employee, employeeEmail: a.EmployeeEmail,
+    hr: a.HR, hrEmail: a.HREmail, type: a.Type, date: a.Date, time: a.Time,
+    reason: a.Reason, notes: a.Notes, status: a.Status, outcome: a.Outcome,
+    meetLink: a.MeetLink,
+  }));
+
+  DATA.cases = (res.cases || []).map(c => ({
+    number: c.Number, employee: c.Employee, category: c.Category, status: c.Status,
+    priority: c.Priority, assigned: c.Assigned, description: c.Description,
+    history: safeJSON_(c.HistoryJSON, []),
+  }));
+
+  DATA.requests = res.requests || [];
+
+  if (res.employees && res.employees.length){
+    DATA.employees = res.employees.map(e => ({
+      id: e.ID, name: e.Name, dept: e.Dept, position: e.Position,
+      supervisor: e.Supervisor, status: e.Status,
+    }));
+  }
+  if (res.archive && res.archive.length){
+    DATA.archiveDocs = res.archive.map(d => ({ title: d.Title, type: d.Type, date: d.Date, by: d.By }));
+  }
+  if (res.backupLogs && res.backupLogs.length){
+    DATA.backupLogs = res.backupLogs.map(l => ({ text: l.Text, time: l.Time }));
+  }
+}
 
 /* ---------------------------------------------------------------
    1. DUMMY DATA
@@ -403,10 +490,42 @@ function initAuth(){
     $("#pw-toggle").textContent = show ? "Hide" : "Show";
   });
 
-  $("#login-form").addEventListener("submit", e=>{
+  // With a real backend connected, the demo role picker just falls back
+  // for accounts that don't have a Role set in the sheet yet.
+  if (apiConfigured() && $("#login-role")) {
+    const roleField = $("#login-role").closest(".field");
+    if (roleField) roleField.querySelector("span").textContent = "Fallback role (if account has none)";
+  }
+
+  $("#login-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    STATE.role = $("#login-role").value;
-    enterApp();
+    const submitBtn = $("#login-form button[type=submit]");
+    const email = $("#login-id").value.trim();
+    const password = $("#login-pw").value;
+
+    if (!apiConfigured()) {
+      // No backend configured yet — keep the original demo behavior.
+      STATE.role = $("#login-role").value;
+      enterApp();
+      return;
+    }
+
+    submitBtn.disabled = true; submitBtn.textContent = "Signing in\u2026";
+    try {
+      const res = await apiPost("login", { email, password });
+      if (!res.ok) { toast(res.error || "Sign-in failed"); return; }
+      const acc = res.account;
+      const role = acc.Role || $("#login-role").value || "employee";
+      STATE.role = role;
+      DATA.users[role] = {
+        name: acc.Name, role: roleLabel_(role), empId: acc.EmployeeID,
+        dept: acc.Department, position: acc.Position || "", initials: initialsFrom_(acc.Name),
+      };
+      await loadBackendData();
+      enterApp();
+    } finally {
+      submitBtn.disabled = false; submitBtn.textContent = "Sign in";
+    }
   });
 
   $all("[data-next]").forEach(btn=>{
@@ -420,8 +539,19 @@ function initAuth(){
     btn.addEventListener("click", ()=> goToStep(btn.dataset.back));
   });
 
-  $("#register-form").addEventListener("submit", e=>{
+  $("#register-form").addEventListener("submit", async e=>{
     e.preventDefault();
+    const pw = $("#reg-pw").value, pw2 = $("#reg-pw2").value;
+    if (pw !== pw2) { toast("Passwords don't match"); return; }
+
+    if (apiConfigured()) {
+      const res = await apiPost("register", {
+        name: $("#reg-name").value, email: $("#reg-email").value, password: pw,
+        employeeId: $("#reg-empid").value, department: $("#reg-dept").value,
+      });
+      if (!res.ok) { toast(res.error || "Registration failed"); return; }
+    }
+
     toast("Account created \u2014 you can now sign in.");
     $("#login-id").value = $("#reg-email").value;
     $("#panel-register").classList.add("hidden");
@@ -455,6 +585,8 @@ function goToStep(n){
   }
 }
 
+let SYNC_TIMER = null;
+
 function enterApp(){
   const u = DATA.users[STATE.role];
   $("#auth-screen").classList.add("hidden");
@@ -466,6 +598,25 @@ function enterApp(){
   renderSidebar();
   switchView("dashboard");
   toast(`Signed in as ${u.name}`);
+  startSync();
+}
+
+// Polls the Google Sheet every few seconds so changes made by other
+// signed-in users (new announcements, appointments, cases, etc.) show up
+// without a page reload. Google Sheets has no native push/websocket API,
+// so polling is the closest practical approximation of "real time".
+function startSync(SYNC_INTERVAL_MS = 8000){
+  if (!apiConfigured() || SYNC_TIMER) return;
+  SYNC_TIMER = setInterval(async ()=>{
+    try {
+      await loadBackendData();
+      renderView(STATE.currentView);
+    } catch (e) { /* silent — next poll will retry */ }
+  }, SYNC_INTERVAL_MS);
+}
+
+function stopSync(){
+  if (SYNC_TIMER) { clearInterval(SYNC_TIMER); SYNC_TIMER = null; }
 }
 
 function logout(){
@@ -473,6 +624,7 @@ function logout(){
   $("#auth-screen").classList.remove("hidden");
   $("#login-form").reset();
   closeSidebar();
+  stopSync();
 }
 
 /* ---------------------------------------------------------------
@@ -1308,44 +1460,99 @@ function initModals(){
   });
 
   $("#appt-new-btn").addEventListener("click", ()=> openModal("modal-appointment"));
-  $("#appointment-form").addEventListener("submit", e=>{
+  $("#appointment-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    const id = "AT-" + (500 + DATA.appointments.length + 1);
-    DATA.appointments.unshift({
-      id, employee: DATA.users[STATE.role].name, hr: $("#appt-hr").value, type: $("#appt-type").value,
-      date: $("#appt-date").value || "TBD", time: $("#appt-time").value || "TBD",
-      reason: $("#appt-reason").value, status:"Pending Review", notes: $("#appt-notes").value || "", outcome:"",
-    });
-    toast("Appointment request sent to HR for review");
+    const type = $("#appt-type").value;
+    const payload = {
+      employee: DATA.users[STATE.role].name,
+      employeeEmail: DATA.users[STATE.role].email || "",
+      hr: $("#appt-hr").value, type,
+      date: $("#appt-date").value || "", time: $("#appt-time").value || "",
+      reason: $("#appt-reason").value, notes: $("#appt-notes").value || "",
+    };
+
+    if (apiConfigured()) {
+      const res = await apiPost("addAppointment", payload);
+      if (!res.ok) { toast(res.error || "Couldn't submit appointment"); return; }
+      const a = res.appointment;
+      DATA.appointments.unshift({
+        id: a.ID, employee: a.Employee, hr: a.HR, type: a.Type, date: a.Date || "TBD",
+        time: a.Time || "TBD", reason: a.Reason, status: a.Status, notes: a.Notes,
+        outcome: a.Outcome, meetLink: a.MeetLink,
+      });
+      toast(a.MeetLink
+        ? "Appointment sent \u2014 Google Meet link created and calendar invite sent"
+        : "Appointment request sent to HR for review");
+    } else {
+      const id = "AT-" + (500 + DATA.appointments.length + 1);
+      DATA.appointments.unshift({
+        id, employee: payload.employee, hr: payload.hr, type,
+        date: payload.date || "TBD", time: payload.time || "TBD",
+        reason: payload.reason, status:"Pending Review", notes: payload.notes, outcome:"",
+      });
+      toast("Appointment request sent to HR for review");
+    }
+
     closeModals();
     $("#appointment-form").reset();
     if(STATE.currentView === "appointments") renderAppointments();
   });
 
   $("#case-new-btn").addEventListener("click", ()=> openModal("modal-case-new"));
-  $("#case-new-form").addEventListener("submit", e=>{
+  $("#case-new-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    const number = "C-" + (1055 + DATA.cases.length + 1);
-    DATA.cases.unshift({
-      number, employee: DATA.users[STATE.role].name, category: $("#case-category").value,
-      status:"Open", priority: $("#case-priority").value, assigned:"Marisol Reyes",
-      description: $("#case-desc").value, history:[{text:"Case filed", time:"Just now"}],
-    });
-    toast(`Case ${number} filed`);
+    const payload = {
+      employee: DATA.users[STATE.role].name, category: $("#case-category").value,
+      priority: $("#case-priority").value, description: $("#case-desc").value,
+    };
+
+    if (apiConfigured()) {
+      const res = await apiPost("addCase", payload);
+      if (!res.ok) { toast(res.error || "Couldn't file case"); return; }
+      const c = res.case;
+      DATA.cases.unshift({
+        number: c.Number, employee: c.Employee, category: c.Category, status: c.Status,
+        priority: c.Priority, assigned: c.Assigned, description: c.Description,
+        history: safeJSON_(c.HistoryJSON, []),
+      });
+      toast(`Case ${c.Number} filed`);
+    } else {
+      const number = "C-" + (1055 + DATA.cases.length + 1);
+      DATA.cases.unshift({
+        number, employee: payload.employee, category: payload.category,
+        status:"Open", priority: payload.priority, assigned:"Marisol Reyes",
+        description: payload.description, history:[{text:"Case filed", time:"Just now"}],
+      });
+      toast(`Case ${number} filed`);
+    }
+
     closeModals();
     $("#case-new-form").reset();
     if(STATE.currentView === "cases") renderCases();
   });
 
   $("#ann-new-btn").addEventListener("click", ()=> openModal("modal-ann-new"));
-  $("#ann-new-form").addEventListener("submit", e=>{
+  $("#ann-new-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    const id = Math.max(...DATA.announcements.map(a=>a.id)) + 1;
-    DATA.announcements.unshift({
-      id, title: $("#ann-title").value, category: $("#ann-category").value,
-      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name, date:"Just now",
+    const payload = {
+      title: $("#ann-title").value, category: $("#ann-category").value,
+      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name,
       priority: $("#ann-priority").value === "High" ? "High" : "Normal",
-    });
+    };
+
+    if (apiConfigured()) {
+      const res = await apiPost("addAnnouncement", payload);
+      if (!res.ok) { toast(res.error || "Couldn't post announcement"); return; }
+      const a = res.announcement;
+      DATA.announcements.unshift({
+        id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
+        author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
+      });
+    } else {
+      const id = Math.max(0, ...DATA.announcements.map(a=>a.id)) + 1;
+      DATA.announcements.unshift({ id, date:"Just now", ...payload });
+    }
+
     toast("Announcement posted");
     closeModals();
     $("#ann-new-form").reset();
