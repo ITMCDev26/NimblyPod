@@ -188,7 +188,12 @@ textarea{ resize:vertical; }
   padding:22px 14px;
   position:sticky; top:0; height:100vh;
 }
-.sidebar-brand{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-size:19px; padding:4px 10px 26px; }
+.sidebar-brand{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-size:19px; padding:4px 10px 26px; position:relative; }
+.sidebar-close{
+  display:none; margin-left:auto; background:rgba(255,255,255,.1); border:none; color:#fff;
+  width:30px; height:30px; border-radius:8px; font-size:20px; line-height:1; cursor:pointer; flex:none;
+}
+.sidebar-close:hover{ background:rgba(255,255,255,.2); }
 .side-nav{ flex:1; overflow-y:auto; }
 .side-group-label{ font-size:11px; text-transform:none; letter-spacing:.02em; color:rgba(255,255,255,.5); padding:14px 12px 6px; }
 .nav-item{
@@ -212,6 +217,7 @@ textarea{ resize:vertical; }
   position:sticky; top:0; z-index:20;
 }
 .hamburger{ display:none; background:none; border:none; font-size:20px; cursor:pointer; color:var(--dark-green); }
+.sidebar-backdrop{ display:none; }
 .topbar-title h1{ font-size:21px; }
 .topbar-title p{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
 .topbar-actions{ margin-left:auto; display:flex; align-items:center; gap:14px; }
@@ -248,7 +254,7 @@ textarea{ resize:vertical; }
 .welcome-pills strong{ font-weight:700; margin-right:4px; color:var(--dark-green); }
 .welcome-art{ width:150px; height:150px; flex:none; opacity:.9; }
 .welcome-art path{ fill:none; stroke:var(--secondary); stroke-width:5; stroke-linecap:round; opacity:.4; }
-.welcome-logo-side{ width:110px; height:110px; flex:none; object-fit:contain; display:none; }
+.welcome-logo-side{ width:clamp(140px, 22vw, 300px); height:auto; max-height:220px; object-fit:contain; flex:none; display:none; }
 .welcome-logo-side.loaded{ display:block; }
 .welcome-logo-side.loaded ~ .welcome-art{ display:none; }
 
@@ -488,10 +494,14 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 /* ============================================================
    LOGO (image-based, swappable via CONFIG.logoUrl)
    ============================================================ */
-.logo-img{ height:30px; width:30px; object-fit:contain; border-radius:7px; flex:none; display:none; }
+.logo-img{ height:auto; width:auto; max-width:100%; display:none; }
 .logo-img.loaded{ display:inline-block; }
+.brand-mark .logo-img{ height:34px; max-width:220px; }
+.sidebar-brand .logo-img{ height:26px; max-width:190px; }
+.brand-mark, .sidebar-brand{ overflow:hidden; }
 .brand-mark .brand-leaf, .sidebar-brand .brand-leaf{ display:inline-block; }
 .brand-mark .logo-img.loaded + .brand-leaf, .sidebar-brand .logo-img.loaded + .brand-leaf{ display:none; }
+.brand-mark .logo-img.loaded ~ .brand-word, .sidebar-brand .logo-img.loaded ~ .brand-word{ display:none; }
 .welcome-logo{ height:34px; width:34px; object-fit:contain; border-radius:8px; display:none; margin-right:10px; vertical-align:middle; }
 .welcome-logo.loaded{ display:inline-block; }
 .brand-word{ font-family:var(--font-logo); font-weight:400; letter-spacing:.01em; }
@@ -575,13 +585,19 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 @media (max-width: 900px){
   .auth-screen{ grid-template-columns:1fr; }
   .auth-side{ display:none; }
-  .sidebar{ position:fixed; left:-260px; z-index:50; transition:left .2s ease; box-shadow:0 0 0 2000px rgba(0,0,0,0); }
-  .sidebar.open{ left:0; box-shadow:20px 0 40px rgba(0,0,0,.2); }
+  .sidebar{ position:fixed; left:-260px; z-index:50; transition:left .2s ease; }
+  .sidebar.open{ left:0; box-shadow:20px 0 40px rgba(0,0,0,.25); }
   .hamburger{ display:block; }
+  .sidebar-close{ display:flex; align-items:center; justify-content:center; }
+  .sidebar-backdrop{
+    display:none; position:fixed; inset:0; z-index:45; background:rgba(15,22,42,.5);
+  }
+  .sidebar-backdrop.open{ display:block; }
   .dash-grid{ grid-template-columns:1fr; }
   .dash-grid-2{ grid-template-columns:1fr; }
   .welcome-banner{ flex-direction:column; align-items:flex-start; }
   .welcome-art{ display:none; }
+  .welcome-logo-side{ width:96px; max-height:96px; }
   .kanban{ grid-template-columns:1fr; }
   .kanban-4{ grid-template-columns:1fr; }
   .detail-list{ grid-template-columns:1fr; }

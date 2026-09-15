@@ -10,7 +10,7 @@ const CONFIG = {
   // Paste an image link (e.g. an Imgur direct-image URL) to show your real
   // company logo on the login screen, sidebar, and dashboard banner.
   // Example: "https://i.imgur.com/xxxxxxx.png"
-  logoUrl: "",
+  logoUrl: "https://i.imgur.com/aAPpqvq.png",
 };
 
 /* ---------------------------------------------------------------
@@ -472,12 +472,21 @@ function logout(){
   $("#app-shell").classList.add("hidden");
   $("#auth-screen").classList.remove("hidden");
   $("#login-form").reset();
-  $("#sidebar").classList.remove("open");
+  closeSidebar();
 }
 
 /* ---------------------------------------------------------------
    7. SIDEBAR / NAV
    --------------------------------------------------------------- */
+function openSidebar(){
+  $("#sidebar").classList.add("open");
+  $("#sidebar-backdrop").classList.add("open");
+}
+function closeSidebar(){
+  $("#sidebar").classList.remove("open");
+  $("#sidebar-backdrop").classList.remove("open");
+}
+
 function buildNavList(container, items){
   container.innerHTML = "";
   items.filter(i=>roleAllowed(i.roles)).forEach(item=>{
@@ -488,7 +497,7 @@ function buildNavList(container, items){
     btn.addEventListener("click", ()=>{
       switchView(item.id);
       if(item.id === "organization" && item.tab){ STATE.orgTab = item.tab; renderOrganization(); syncOrgTabs(); }
-      if(window.innerWidth <= 900) $("#sidebar").classList.remove("open");
+      if(window.innerWidth <= 900) closeSidebar();
     });
     li.appendChild(btn);
     container.appendChild(li);
@@ -1361,7 +1370,11 @@ function openRequestModal(presetType){
    --------------------------------------------------------------- */
 function initChrome(){
   $("#logout-btn").addEventListener("click", logout);
-  $("#hamburger").addEventListener("click", ()=> $("#sidebar").classList.toggle("open"));
+  $("#hamburger").addEventListener("click", ()=>{
+    if($("#sidebar").classList.contains("open")) closeSidebar(); else openSidebar();
+  });
+  $("#sidebar-close").addEventListener("click", closeSidebar);
+  $("#sidebar-backdrop").addEventListener("click", closeSidebar);
   $("#notif-btn").addEventListener("click", ()=> toast(`You have ${DATA.notifications.length} notifications`));
 
   $all("[data-orgtab]").forEach(t=> t.addEventListener("click", ()=>{ STATE.orgTab = t.dataset.orgtab; renderOrganization(); }));
