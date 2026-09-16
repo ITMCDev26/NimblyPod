@@ -63,6 +63,7 @@ function safeJSON_(str, fallback){
 // No password is ever stored, only the account details already returned
 // by a successful login.
 const REMEMBER_KEY = "nimblyRememberedSession";
+const REMEMBER_CREDS_KEY = "nimblyRememberedCredentials";
 
 function saveRememberedSession(session){
   try { localStorage.setItem(REMEMBER_KEY, JSON.stringify(session)); } catch (e) {}
@@ -72,6 +73,19 @@ function clearRememberedSession(){
 }
 function loadRememberedSession(){
   try { return safeJSON_(localStorage.getItem(REMEMBER_KEY), null); } catch (e) { return null; }
+}
+
+// Separately, the actual email/password typed into the login form — so the
+// fields themselves stay pre-filled on the login screen when "Remember me"
+// is checked, the way a normal login page behaves.
+function saveRememberedCreds(email, password){
+  try { localStorage.setItem(REMEMBER_CREDS_KEY, JSON.stringify({ email, password })); } catch (e) {}
+}
+function clearRememberedCreds(){
+  try { localStorage.removeItem(REMEMBER_CREDS_KEY); } catch (e) {}
+}
+function loadRememberedCreds(){
+  try { return safeJSON_(localStorage.getItem(REMEMBER_CREDS_KEY), null); } catch (e) { return null; }
 }
 
 // Pulls live data from the Google Sheet backend into the DATA object
@@ -485,6 +499,13 @@ function applyLogo(){
    6. AUTH SCREEN LOGIC
    --------------------------------------------------------------- */
 function initAuth(){
+  const remembered = loadRememberedCreds();
+  if (remembered) {
+    $("#login-id").value = remembered.email || "";
+    $("#login-pw").value = remembered.password || "";
+    $("#login-remember").checked = true;
+  }
+
   $("#show-register").addEventListener("click", e=>{ e.preventDefault(); $("#panel-login").classList.add("hidden"); $("#panel-register").classList.remove("hidden"); });
   $("#show-login").addEventListener("click", e=>{ e.preventDefault(); $("#panel-register").classList.add("hidden"); $("#panel-login").classList.remove("hidden"); });
 
@@ -513,8 +534,10 @@ function initAuth(){
       STATE.role = $("#login-role").value;
       if ($("#login-remember").checked) {
         saveRememberedSession({ mode: "demo", role: STATE.role });
+        saveRememberedCreds(email, password);
       } else {
         clearRememberedSession();
+        clearRememberedCreds();
       }
       enterApp();
       return;
@@ -533,8 +556,10 @@ function initAuth(){
       };
       if ($("#login-remember").checked) {
         saveRememberedSession({ mode: "backend", role, user: DATA.users[role] });
+        saveRememberedCreds(email, password);
       } else {
         clearRememberedSession();
+        clearRememberedCreds();
       }
       await loadBackendData();
       enterApp();
@@ -639,6 +664,12 @@ function logout(){
   $("#auth-screen").classList.remove("hidden");
   $("#login-form").reset();
   clearRememberedSession();
+  const remembered = loadRememberedCreds();
+  if (remembered) {
+    $("#login-id").value = remembered.email || "";
+    $("#login-pw").value = remembered.password || "";
+    $("#login-remember").checked = true;
+  }
   closeSidebar();
   stopSync();
 }
