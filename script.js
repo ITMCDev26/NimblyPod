@@ -167,22 +167,53 @@ const DATA = {
     { id:"NP-2020-0066", name:"Cassy Uy", dept:"Talent Acquisition & Workforce Planning", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
     { id:"NP-2022-0087", name:"Aira Bautista", dept:"Talent Acquisition & Workforce Planning", position:"Communications Officer", supervisor:"Cassy Uy", status:"Active" },
     { id:"NP-2023-0114", name:"Miko Villareal", dept:"Talent Acquisition & Workforce Planning", position:"HR Analyst", supervisor:"Cassy Uy", status:"Probationary" },
+    { id:"NP-2023-0115", name:"Renz Cabrera", dept:"Talent Acquisition & Workforce Planning", position:"Recruitment Specialist", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2023-0116", name:"Faye Aquino", dept:"Talent Acquisition & Workforce Planning", position:"Sourcing Specialist", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2024-0117", name:"Job Mendoza", dept:"Talent Acquisition & Workforce Planning", position:"Onboarding Coordinator", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2024-0118", name:"Liza Ferrer", dept:"Talent Acquisition & Workforce Planning", position:"Workforce Planning Analyst", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2024-0119", name:"Dex Salonga", dept:"Talent Acquisition & Workforce Planning", position:"Recruitment Coordinator", supervisor:"Cassy Uy", status:"Probationary" },
+    { id:"NP-2025-0120", name:"Marga Ilustre", dept:"Talent Acquisition & Workforce Planning", position:"HR Consultant", supervisor:"Cassy Uy", status:"Active" },
+    { id:"NP-2025-0121", name:"Owen Rivera", dept:"Talent Acquisition & Workforce Planning", position:"HR Staff", supervisor:"Cassy Uy", status:"Active" },
 
     { id:"NP-2021-0055", name:"Kyle Fernandez", dept:"Learning, Training & Development", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
     { id:"NP-2018-0022", name:"Denise Ocampo", dept:"Learning, Training & Development", position:"HR Consultant", supervisor:"Kyle Fernandez", status:"On Leave" },
     { id:"NP-2023-0130", name:"Noel Trinidad", dept:"Learning, Training & Development", position:"HR Staff", supervisor:"Kyle Fernandez", status:"Active" },
+    { id:"NP-2023-0131", name:"Cielo Mangubat", dept:"Learning, Training & Development", position:"Training Specialist", supervisor:"Kyle Fernandez", status:"Active" },
+    { id:"NP-2024-0132", name:"Basti Domingo", dept:"Learning, Training & Development", position:"Learning Coordinator", supervisor:"Kyle Fernandez", status:"Active" },
+    { id:"NP-2024-0133", name:"Rain Cortez", dept:"Learning, Training & Development", position:"Curriculum Developer", supervisor:"Kyle Fernandez", status:"Active" },
+    { id:"NP-2024-0134", name:"Vince Ramos", dept:"Learning, Training & Development", position:"Competency Analyst", supervisor:"Kyle Fernandez", status:"Probationary" },
+    { id:"NP-2025-0135", name:"Nadia Espino", dept:"Learning, Training & Development", position:"Training Coordinator", supervisor:"Kyle Fernandez", status:"Active" },
+    { id:"NP-2025-0136", name:"Josh Tañedo", dept:"Learning, Training & Development", position:"L&D Consultant", supervisor:"Kyle Fernandez", status:"Active" },
 
     { id:"NP-2020-0041", name:"Patrice Lim", dept:"Performance & Rewards", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
     { id:"NP-2017-0019", name:"Grace Manansala", dept:"Performance & Rewards", position:"HR Analyst", supervisor:"Patrice Lim", status:"Active" },
     { id:"NP-2024-0151", name:"Sam Ilagan", dept:"Performance & Rewards", position:"HR Staff", supervisor:"Patrice Lim", status:"Probationary" },
+    { id:"NP-2024-0152", name:"Tricia Nolasco", dept:"Performance & Rewards", position:"Compensation Analyst", supervisor:"Patrice Lim", status:"Active" },
+    { id:"NP-2024-0153", name:"Marc Bello", dept:"Performance & Rewards", position:"Rewards Coordinator", supervisor:"Patrice Lim", status:"Active" },
+    { id:"NP-2025-0154", name:"Elyse Ocampo", dept:"Performance & Rewards", position:"Performance Analyst", supervisor:"Patrice Lim", status:"Active" },
+    { id:"NP-2025-0155", name:"Kier Gatchalian", dept:"Performance & Rewards", position:"Benefits Specialist", supervisor:"Patrice Lim", status:"Active" },
+    { id:"NP-2025-0156", name:"Bea Santiago", dept:"Performance & Rewards", position:"Evaluation Coordinator", supervisor:"Patrice Lim", status:"Active" },
 
     { id:"NP-2021-0142", name:"Juno Dela Cruz", dept:"Employee Relations & Well-being", position:"HR Staff", supervisor:"Rhys Abad", status:"Active" },
     { id:"NP-2022-0099", name:"Rhys Abad", dept:"Employee Relations & Well-being", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
+    { id:"NP-2023-0143", name:"Wendell Cruz", dept:"Employee Relations & Well-being", position:"Case Officer", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2023-0144", name:"Camille Santos", dept:"Employee Relations & Well-being", position:"Mediation Specialist", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2024-0145", name:"Ram Villafuerte", dept:"Employee Relations & Well-being", position:"Employee Engagement Officer", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2024-0146", name:"Pia Abella", dept:"Employee Relations & Well-being", position:"Well-being Coordinator", supervisor:"Rhys Abad", status:"Probationary" },
+    { id:"NP-2025-0147", name:"Erol Matias", dept:"Employee Relations & Well-being", position:"Grievance Officer", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2025-0148", name:"Shane Buenaflor", dept:"Employee Relations & Well-being", position:"HR Staff", supervisor:"Rhys Abad", status:"Active" },
+    { id:"NP-2025-0149", name:"Iggy Lacson", dept:"Employee Relations & Well-being", position:"Employee Relations Analyst", supervisor:"Rhys Abad", status:"Active" },
 
     { id:"NP-2015-0008", name:"Bien Santos", dept:"HR Operations, Analytics & Policy", position:"Department Head", supervisor:"Rosario Viray (CEO)", status:"Active" },
     { id:"NP-2019-0031", name:"Marisol Reyes", dept:"HR Operations, Analytics & Policy", position:"HR Generalist", supervisor:"Bien Santos", status:"Active" },
     { id:"NP-2012-0001", name:"Admin Root", dept:"HR Operations, Analytics & Policy", position:"Project Manager", supervisor:"Bien Santos", status:"Active" },
     { id:"NP-2026-0201", name:"M. Sheina", dept:"HR Operations, Analytics & Policy", position:"Policy Specialist", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2023-0202", name:"Danna Villaruel", dept:"HR Operations, Analytics & Policy", position:"HR Analyst", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2024-0203", name:"Gio Nazareno", dept:"HR Operations, Analytics & Policy", position:"Systems Administrator", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2024-0204", name:"Kath Almario", dept:"HR Operations, Analytics & Policy", position:"Compliance Officer", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2025-0205", name:"Enzo Padua", dept:"HR Operations, Analytics & Policy", position:"HR Records Officer", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2025-0206", name:"Yna Corpuz", dept:"HR Operations, Analytics & Policy", position:"Data & Analytics Specialist", supervisor:"Bien Santos", status:"Active" },
+    { id:"NP-2025-0207", name:"Reo Villamor", dept:"HR Operations, Analytics & Policy", position:"HR Policy Coordinator", supervisor:"Bien Santos", status:"Active" },
   ],
 
   activity: [
@@ -193,83 +224,42 @@ const DATA = {
     { text:"Training \u201cData Privacy Refresher\u201d completed by 18 employees", time:"Yesterday, 11:02 AM" },
   ],
 
-  notifications: [
-    { text:"Your appointment with Marisol Reyes is tomorrow, 10:00 AM", time:"1h" },
-    { text:"Policy update: revised leave-filing cut-off", time:"3h" },
-    { text:"Certificate of employment ready for pickup", time:"1d" },
-  ],
+  notifications: [],
 
   ceoAnnouncement: {
-    body:"This quarter, we're doubling down on the things that make Nimbly Pod feel like one team across every site \u2014 faster HR turnaround, clearer career paths, and more recognition for the people doing the work. Thank you for everything you bring to our floors every day.",
-    sign:"\u2014 Rosario Viray, Chief Executive Officer",
+    body:"",
+    sign:"",
   },
 
   talentKpis: {
-    headcount:248, openPositions:27, criticalPositions:8, turnoverRisks:12, expenseProjection:"\u20B148.2M", productivityRatio:"87%",
+    headcount:"", openPositions:"", criticalPositions:"", turnoverRisks:"", expenseProjection:"", productivityRatio:"",
   },
 
   workforcePlanning: [
-    { metric:"Current Headcount", value:"248" },
-    { metric:"Target Headcount", value:"275" },
-    { metric:"Open Positions", value:"27" },
-    { metric:"Critical Positions", value:"8" },
-    { metric:"Turnover Risk", value:"12 employees" },
-    { metric:"Projected Turnover", value:"18.5%" },
-    { metric:"Annual Payroll", value:"\u20B142.6M" },
-    { metric:"Expense Projection", value:"\u20B148.2M" },
-    { metric:"Productivity Ratio", value:"87%" },
-    { metric:"Workforce Utilization", value:"91%" },
+    { metric:"Current Headcount", value:"" },
+    { metric:"Target Headcount", value:"" },
+    { metric:"Open Positions", value:"" },
+    { metric:"Critical Positions", value:"" },
+    { metric:"Turnover Risk", value:"" },
+    { metric:"Projected Turnover", value:"" },
+    { metric:"Annual Payroll", value:"" },
+    { metric:"Expense Projection", value:"" },
+    { metric:"Productivity Ratio", value:"" },
+    { metric:"Workforce Utilization", value:"" },
   ],
 
-  vacancies: [
-    { position:"Customer Support Representative", dept:"Customer Support", openings:6, applicants:42, target:"Oct 15, 2026" },
-    { position:"Workforce Management Analyst", dept:"Workforce Management", openings:1, applicants:11, target:"Sep 30, 2026" },
-    { position:"Quality Assurance Analyst", dept:"Quality Assurance", openings:2, applicants:19, target:"Oct 05, 2026" },
-    { position:"Operations Supervisor", dept:"Operations", openings:1, applicants:7, target:"Oct 20, 2026" },
-  ],
+  vacancies: [],
 
   pipelineStages: ["Application","Screening","Interview","Assessment","Selection","Offer","Onboarding"],
-  pipelineCounts: [42,18,11,7,4,3,2],
-  candidates: [
-    { id:"AP-3301", name:"Renz Cabrera", position:"CSR Representative", stage:0 },
-    { id:"AP-3305", name:"Trisha Ong", position:"CSR Representative", stage:0 },
-    { id:"AP-3302", name:"Fatima Reyes", position:"CSR Representative", stage:1 },
-    { id:"AP-3298", name:"Dale Ferrer", position:"WFM Analyst", stage:1 },
-    { id:"AP-3288", name:"Louie Gatchalian", position:"WFM Analyst", stage:2 },
-    { id:"AP-3271", name:"Bea Salonga-Cruz", position:"QA Analyst", stage:3 },
-    { id:"AP-3259", name:"Ivan Domingo", position:"Ops Supervisor", stage:4 },
-    { id:"AP-3240", name:"Nica Alvero", position:"CSR Representative", stage:5 },
-    { id:"AP-3199", name:"Josh Malabanan", position:"QA Analyst", stage:6 },
-  ],
+  pipelineCounts: [0,0,0,0,0,0,0],
+  candidates: [],
 
-  learningUpcoming: [
-    { text:"Customer De-escalation Techniques \u2014 Sep 18, 9:00 AM", time:"in 7 days" },
-    { text:"Data Privacy Refresher \u2014 Sep 22, 2:00 PM", time:"in 11 days" },
-  ],
-  learningAssigned: [
-    { title:"Leadership Foundations", progress:70 },
-    { title:"Advanced Excel for Reporting", progress:35 },
-    { title:"Workplace Safety Refresher", progress:100 },
-  ],
-  learningCompleted: [
-    { title:"Customer Service Excellence", date:"Aug 14, 2026", score:"96%", status:"Passed" },
-    { title:"Six Sigma Yellow Belt", date:"Jun 02, 2026", score:"88%", status:"Certified" },
-    { title:"Anti-Harassment Policy Training", date:"Mar 20, 2026", score:"100%", status:"Passed" },
-  ],
-  trainingCalendar: [
-    { session:"Customer De-escalation Techniques", facilitator:"Marisol Reyes", date:"Sep 18, 2026", attendance:"38 / 40", completion:80 },
-    { session:"Data Privacy Refresher", facilitator:"Kyle Fernandez", date:"Sep 22, 2026", attendance:"52 / 60", completion:65 },
-    { session:"New Leader Bootcamp", facilitator:"Bien Santos", date:"Oct 02, 2026", attendance:"14 / 20", completion:20 },
-  ],
-  competencyGaps: [
-    { title:"Advanced reporting (WFM team)", progress:42 },
-    { title:"Conflict resolution (Team Leads)", progress:58 },
-    { title:"Systems troubleshooting (IT Support)", progress:65 },
-  ],
-  succession: [
-    { text:"Cassy Uy identified as ready-now successor for Ops Manager", time:"Reviewed Aug 2026" },
-    { text:"Kyle Fernandez on development track for HR Generalist", time:"Reviewed Jul 2026" },
-  ],
+  learningUpcoming: [],
+  learningAssigned: [],
+  learningCompleted: [],
+  trainingCalendar: [],
+  competencyGaps: [],
+  succession: [],
 
   announcements: [
     { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026", priority:"High" },
@@ -357,15 +347,15 @@ const DATA = {
 };
 
 const KPI = {
-  totalEmployees: 52,
-  pendingApprovals: 3,
+  totalEmployees: DATA.employees.length,
+  pendingApprovals: DATA.appointments.filter(a=>a.status==="Pending Review").length,
   upcomingAppointments: DATA.appointments.filter(a=>a.status==="Pending Review" || a.status==="Accepted").length,
-  newHires: 14,
-  turnover: "4.1%",
-  retention: "95.9%",
-  absenteeism: "2.3%",
-  trainingCompletion: "78%",
-  engagement: "84%",
+  newHires: "",
+  turnover: "",
+  retention: "",
+  absenteeism: "",
+  trainingCompletion: "",
+  engagement: "",
 };
 
 /* ---------------------------------------------------------------
@@ -405,13 +395,13 @@ const NAV_MAIN = [
 ];
 
 const NAV_HR = [
-  { id:"recruitment",   label:"Talent Acquisition",                 icon:"talent",     roles:["hr","hrhead","admin"] },
-  { id:"learning",      label:"Learning & Development",             icon:"ld",         roles:["hr","hrhead","admin"] },
-  { id:"performance",   label:"Performance & Rewards",              icon:"rewards",    roles:["hr","hrhead","admin"] },
-  { id:"wellbeing",     label:"Employee Relations & Well-being",    icon:"relations",  roles:["hr","hrhead","admin"] },
-  { id:"analytics",     label:"HR Operations & Analytics",          icon:"ops",        roles:["hr","hrhead","admin"] },
-  { id:"organization",  label:"User Management",                    icon:"users",      roles:["admin"], tab:"employeedir" },
-  { id:"organization",  label:"Organization Management",            icon:"org",        roles:["admin"], tab:"orgchart" },
+  { id:"recruitment",   label:"Talent Acquisition & Workforce Planning",  icon:"talent",     roles:["hr","hrhead","admin"] },
+  { id:"learning",      label:"Learning, Training & Development",         icon:"ld",         roles:["hr","hrhead","admin"] },
+  { id:"performance",   label:"Performance & Rewards",                    icon:"rewards",    roles:["hr","hrhead","admin"] },
+  { id:"wellbeing",     label:"Employee Relations & Well-being",          icon:"relations",  roles:["hr","hrhead","admin"] },
+  { id:"analytics",     label:"HR Operations, Analytics & Policy",        icon:"ops",        roles:["hr","hrhead","admin"] },
+  { id:"organization",  label:"User Management",                         icon:"users",      roles:["admin"], tab:"employeedir" },
+  { id:"organization",  label:"Organization Management",                 icon:"org",        roles:["admin"], tab:"orgchart" },
 ];
 
 const VIEW_META = {
@@ -724,14 +714,16 @@ function renderDashboard(){
       <p>${p.desc}</p>
     </div>`).join("");
 
-  $("#dash-ceo").innerHTML = `<p>${DATA.ceoAnnouncement.body}</p><span class="ceo-sign">${DATA.ceoAnnouncement.sign}</span>`;
+  $("#dash-ceo").innerHTML = DATA.ceoAnnouncement.body
+    ? `<p>${DATA.ceoAnnouncement.body}</p><span class="ceo-sign">${DATA.ceoAnnouncement.sign}</span>`
+    : `<p class="empty-note" style="padding:4px 0;">No CEO announcement posted yet.</p>`;
   $("#dash-contact").innerHTML = `<span>&#128276;</span><span>${DATA.communicationsOfficerNote}</span>`;
 
   $("#dash-activity").innerHTML = DATA.activity.map(a=>`
-    <li><span class="dot-ic"></span><div class="act-text"><strong>${a.text}</strong><span class="act-time">${a.time}</span></div></li>`).join("");
+    <li><span class="dot-ic"></span><div class="act-text"><strong>${a.text}</strong><span class="act-time">${a.time}</span></div></li>`).join("") || `<li class="empty-note">No recent activity yet.</li>`;
 
   $("#dash-notifs").innerHTML = DATA.notifications.map(n=>`
-    <li><span>${n.text}</span><span class="n-time">${n.time}</span></li>`).join("");
+    <li><span>${n.text}</span><span class="n-time">${n.time}</span></li>`).join("") || `<li class="empty-note">No notifications yet.</li>`;
 }
 
 /* ---------------------------------------------------------------
@@ -853,31 +845,44 @@ function renderPositions(){
    10. RENDER: ANALYTICS
    --------------------------------------------------------------- */
 function renderAnalytics(){
-  const kpis = [
-    { label:"New hires (QTD)", value:KPI.newHires },
-    { label:"Turnover rate", value:KPI.turnover },
-    { label:"Retention rate", value:KPI.retention },
-    { label:"Absenteeism", value:KPI.absenteeism },
-    { label:"Training completion", value:KPI.trainingCompletion },
-    { label:"Engagement score", value:KPI.engagement },
+  const editable = isHrRole();
+  const anKpiKeys = [
+    ["newHires","New hires (QTD)"], ["turnover","Turnover rate"], ["retention","Retention rate"],
+    ["absenteeism","Absenteeism"], ["trainingCompletion","Training completion"], ["engagement","Engagement score"],
   ];
-  $("#an-kpis").innerHTML = kpis.map(k=>`
-    <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
+  $("#an-kpis").innerHTML = anKpiKeys.map(([key,label])=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${label}</div>
+      ${editable
+        ? `<input class="kpi-value-input" data-analyticskpi="${key}" value="${KPI[key]}" placeholder="Not yet entered" />`
+        : `<div class="kpi-value">${KPI[key] || "&mdash;"}</div>`}
+    </div>`).join("");
+  $all("[data-analyticskpi]").forEach(input=>{
+    input.addEventListener("change", ()=>{ KPI[input.dataset.analyticskpi] = input.value; toast("Metric updated"); });
+  });
 
   const deptCounts = DATA.departments.map(d=> DATA.employees.filter(e=>e.dept===d).length);
   drawBarChart("chart-headcount", DATA.departments.map(d=>DATA.deptInfo[d].short), deptCounts, "#17382A");
 
-  drawLineChart("chart-turnover",
-    ["Apr","May","Jun","Jul","Aug","Sep"],
-    [ { name:"Retention %", color:"#17382A", values:[93,94,95,94.5,95.5,95.9] },
-      { name:"Turnover %",  color:"#0F162A", values:[6,5.4,4.9,5.2,4.4,4.1] } ]
-  );
+  const statusCounts = ["Active","On Leave","Probationary"].map(s=> DATA.employees.filter(e=>e.status===s).length);
+  drawBarChart("chart-turnover", ["Active","On Leave","Probationary"], statusCounts, "#0F162A");
 
   const colors = ["#17382A","#1F6B45","#2F8B5B","#5CAE81","#9A6B00","#0F162A","#536860"];
-  drawDonutChart("chart-recruit", DATA.pipelineStages, DATA.pipelineCounts, colors);
-  $("#chart-recruit-legend").innerHTML = DATA.pipelineStages.map((s,i)=>`<span><i style="background:${colors[i]}"></i>${s} (${DATA.pipelineCounts[i]})</span>`).join("");
+  const pipelineTotal = DATA.pipelineCounts.reduce((a,b)=>a+b,0);
+  if(pipelineTotal > 0){
+    drawDonutChart("chart-recruit", DATA.pipelineStages, DATA.pipelineCounts, colors);
+    $("#chart-recruit-legend").innerHTML = DATA.pipelineStages.map((s,i)=>`<span><i style="background:${colors[i]}"></i>${s} (${DATA.pipelineCounts[i]})</span>`).join("");
+  } else {
+    prepCanvas("chart-recruit");
+    $("#chart-recruit-legend").innerHTML = `<span class="empty-note">No active pipeline candidates yet.</span>`;
+  }
 
-  drawBarChart("chart-training", ["Support","Ops","WFM","IT","HR","Finance","QA"], [82,74,68,90,95,71,77], "#17382A");
+  const hasTrainingData = DATA.trainingCalendar && DATA.trainingCalendar.length > 0;
+  if(hasTrainingData){
+    drawBarChart("chart-training", DATA.trainingCalendar.map(s=>s.session), DATA.trainingCalendar.map(s=>s.completion), "#17382A");
+  } else {
+    prepCanvas("chart-training");
+  }
 }
 
 /* ---------------------------------------------------------------
@@ -920,24 +925,38 @@ function renderPerformance(){
 function renderRecruitment(){
   syncRecTabs();
 
-  $("#rec-kpis").innerHTML = [
-    { label:"Current headcount", value:DATA.talentKpis.headcount },
-    { label:"Open positions", value:DATA.talentKpis.openPositions },
-    { label:"Critical positions", value:DATA.talentKpis.criticalPositions },
-    { label:"Turnover risks", value:DATA.talentKpis.turnoverRisks },
-    { label:"Expense projection", value:DATA.talentKpis.expenseProjection },
-    { label:"Productivity ratio", value:DATA.talentKpis.productivityRatio },
-  ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>`).join("");
+  const recEditable = isHrRole();
+  const recKpiKeys = [
+    ["headcount","Current headcount"], ["openPositions","Open positions"], ["criticalPositions","Critical positions"],
+    ["turnoverRisks","Turnover risks"], ["expenseProjection","Expense projection"], ["productivityRatio","Productivity ratio"],
+  ];
+  $("#rec-kpis").innerHTML = recKpiKeys.map(([key,label])=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${label}</div>
+      ${recEditable
+        ? `<input class="kpi-value-input" data-talentkpi="${key}" value="${DATA.talentKpis[key]}" placeholder="Not yet entered" />`
+        : `<div class="kpi-value">${DATA.talentKpis[key] || "&mdash;"}</div>`}
+    </div>`).join("");
+  $all("[data-talentkpi]").forEach(input=>{
+    input.addEventListener("change", ()=>{ DATA.talentKpis[input.dataset.talentkpi] = input.value; toast("Workforce metric updated"); });
+  });
 
   $("#rec-contact").innerHTML = `<span>&#128172;</span><span>${DATA.communicationsOfficerNote}</span>`;
 
   $("#rec-vacancies-body").innerHTML = DATA.vacancies.map(v=>`
-    <tr><td class="cell-name">${v.position}</td><td>${v.dept}</td><td>${v.openings}</td><td>${v.applicants}</td><td>${v.target}</td></tr>`).join("");
+    <tr><td class="cell-name">${v.position}</td><td>${v.dept}</td><td>${v.openings}</td><td>${v.applicants}</td><td>${v.target}</td></tr>`).join("")
+    || `<tr><td colspan="5" class="empty-note">No open vacancies posted yet.</td></tr>`;
 
   renderKanbanRecruitment();
 
   $("#rec-workforce-body").innerHTML = DATA.workforcePlanning.map(m=>`
-    <tr><td class="cell-name">${m.metric}</td><td>${m.value}</td></tr>`).join("");
+    <tr><td class="cell-name">${m.metric}</td><td>${recEditable ? `<input class="kpi-value-input" style="font-size:13px;padding:5px 8px;" data-wfmetric="${m.metric}" value="${m.value}" placeholder="Not yet entered" />` : (m.value || "&mdash;")}</td></tr>`).join("");
+  $all("[data-wfmetric]").forEach(input=>{
+    input.addEventListener("change", ()=>{
+      const row = DATA.workforcePlanning.find(m=>m.metric===input.dataset.wfmetric);
+      if(row){ row.value = input.value; toast("Workforce metric updated"); }
+    });
+  });
 }
 
 function syncRecTabs(){

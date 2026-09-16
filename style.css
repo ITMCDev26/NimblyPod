@@ -222,6 +222,24 @@ textarea{ resize:vertical; }
 .topbar-title p{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
 .topbar-actions{ margin-left:auto; display:flex; align-items:center; gap:14px; }
 .icon-btn{ position:relative; background:none; border:none; font-size:18px; cursor:pointer; padding:6px; }
+.icon-btn-sm{
+  background:none; border:1px solid var(--line); border-radius:7px;
+  width:28px; height:28px; font-size:13px; cursor:pointer; color:var(--ink-soft); margin-right:4px;
+}
+.icon-btn-sm:hover{ background:var(--light-green); color:var(--dark-green); }
+.empty-note{ padding:20px; text-align:center; color:var(--ink-soft); font-size:13px; }
+.subtab-bar{ display:flex; gap:6px; background:var(--light-green); padding:4px; border-radius:10px; margin-bottom:18px; flex-wrap:wrap; }
+.subtab-bar .tab{ padding:8px 15px; }
+.threshold-row{ display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+.field-inline{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); font-weight:600; }
+.field-inline input{ width:64px; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13px; text-align:center; }
+.kpi-status-dot{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; }
+.kpi-card .kpi-value-input{
+  font-family:var(--font-display); font-size:22px; color:var(--dark-green);
+  border:1px solid var(--line); border-radius:8px; padding:6px 10px; width:100%; background:#fff;
+}
+.doc-link-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 4px; border-bottom:1px dashed var(--line); font-size:13px; }
+.doc-link-row:last-child{ border-bottom:none; }
 .icon-btn .dot{ position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%; background:var(--red); border:2px solid #fff; }
 .user-chip{ display:flex; align-items:center; gap:10px; padding-left:12px; border-left:1px solid var(--line); }
 .avatar{ width:36px; height:36px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13.5px; flex:none; }
@@ -241,22 +259,24 @@ textarea{ resize:vertical; }
   border-radius:var(--radius-lg);
   color:var(--ink);
   padding:34px 38px;
-  display:flex; align-items:center; justify-content:space-between; gap:30px;
+  display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px;
   margin-bottom:24px;
   position:relative; overflow:hidden;
 }
 .welcome-copy{ max-width:640px; position:relative; z-index:1; }
-.eyebrow-free{ font-size:13px; color:var(--secondary); margin-bottom:8px; font-weight:600; display:flex; align-items:center; }
+.eyebrow-free{ font-size:13px; color:var(--secondary); margin-bottom:8px; font-weight:600; display:flex; align-items:center; justify-content:center; }
 .welcome-copy h2{ color:var(--dark-green); font-size:27px; line-height:1.25; margin-bottom:10px; }
 .welcome-msg{ color:var(--ink-soft); font-size:14.5px; line-height:1.55; margin-bottom:18px; }
-.welcome-pills{ display:flex; flex-wrap:wrap; gap:10px; }
+.welcome-pills{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 .welcome-pills span{ background:#fff; border:1px solid var(--line); padding:8px 13px; border-radius:20px; font-size:12.5px; color:var(--ink); }
 .welcome-pills strong{ font-weight:700; margin-right:4px; color:var(--dark-green); }
-.welcome-art{ width:150px; height:150px; flex:none; opacity:.9; }
-.welcome-art path{ fill:none; stroke:var(--secondary); stroke-width:5; stroke-linecap:round; opacity:.4; }
-.welcome-logo-side{ width:clamp(140px, 22vw, 300px); height:auto; max-height:220px; object-fit:contain; flex:none; display:none; }
-.welcome-logo-side.loaded{ display:block; }
-.welcome-logo-side.loaded ~ .welcome-art{ display:none; }
+.welcome-art{
+  width:220px; height:220px; opacity:.14; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%); z-index:0; pointer-events:none;
+}
+.welcome-art path{ fill:none; stroke:var(--secondary); stroke-width:5; stroke-linecap:round; }
+.welcome-logo-center{ width:clamp(120px, 16vw, 180px); height:auto; max-height:150px; object-fit:contain; position:relative; z-index:1; display:none; }
+.welcome-logo-center.loaded{ display:block; }
 
 .kpi-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px; margin-bottom:22px; }
 .kpi-card{
@@ -526,8 +546,6 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 /* ============================================================
    SUB-TAB BAR (reusable for Organization / Recruitment / Well-being)
    ============================================================ */
-.subtab-bar{ display:flex; gap:6px; background:var(--light-green); padding:4px; border-radius:10px; margin-bottom:18px; flex-wrap:wrap; }
-.subtab-bar .tab{ padding:8px 15px; }
 
 /* ============================================================
    POSITIONS / DEPARTMENTS LIST
@@ -595,9 +613,9 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
   .sidebar-backdrop.open{ display:block; }
   .dash-grid{ grid-template-columns:1fr; }
   .dash-grid-2{ grid-template-columns:1fr; }
-  .welcome-banner{ flex-direction:column; align-items:flex-start; }
+  .welcome-banner{ flex-direction:column; align-items:center; }
   .welcome-art{ display:none; }
-  .welcome-logo-side{ width:96px; max-height:96px; }
+  .welcome-logo-center{ width:88px; max-height:88px; }
   .kanban{ grid-template-columns:1fr; }
   .kanban-4{ grid-template-columns:1fr; }
   .detail-list{ grid-template-columns:1fr; }
