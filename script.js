@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbyG7F2nSO8pK6nm-1Qx6TcmY7cyLTDVaUymotgG5JEMqD6-58jlp-evded8aeVhbfn0/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbzgOe9lJ8s2twZR5Wt6_7Kd9IKTyysQU5cvmFyjG-vaiOTR_gnx4vnwP3BYANqQVcz9/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -1240,9 +1240,26 @@ function openCase(number){
     openCase(number);
   }));
   const advBtn = $("[data-advancecase]");
-  if(advBtn) advBtn.addEventListener("click", ()=>{
-    c.status = advBtn.dataset.advancecase;
-    c.history.push({ text:`Status changed to ${c.status}`, time:"Just now" });
+  if(advBtn) advBtn.addEventListener("click", async ()=>{
+    const newStatus = advBtn.dataset.advancecase;
+    const historyEntry = { text:`Status changed to ${newStatus}`, time:"Just now" };
+    advBtn.disabled = true;
+
+    if (apiConfigured()){
+      const res = await apiPost("updateCase", {
+        number: c.number,
+        status: newStatus,
+        historyEntry: historyEntry,
+      });
+      if (!res.ok){
+        toast("Couldn't save that move: " + res.error);
+        advBtn.disabled = false;
+        return;
+      }
+    }
+
+    c.status = newStatus;
+    c.history.push(historyEntry);
     toast(`${c.number} moved to ${c.status}`);
     closeModals();
     renderCases();
