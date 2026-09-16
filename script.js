@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbxRs1N5fYcJElnxHpHEx4Sf54Twc_BkbZxLCuFtA7ibpYeDL3fEHxs6Re2cx_6s5MIG/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyG7F2nSO8pK6nm-1Qx6TcmY7cyLTDVaUymotgG5JEMqD6-58jlp-evded8aeVhbfn0/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -57,6 +57,21 @@ function fmtDate_(v){
 
 function safeJSON_(str, fallback){
   try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+// "Remember me" — persists just enough to skip the login form next visit.
+// No password is ever stored, only the account details already returned
+// by a successful login.
+const REMEMBER_KEY = "nimblyRememberedSession";
+
+function saveRememberedSession(session){
+  try { localStorage.setItem(REMEMBER_KEY, JSON.stringify(session)); } catch (e) {}
+}
+function clearRememberedSession(){
+  try { localStorage.removeItem(REMEMBER_KEY); } catch (e) {}
+}
+function loadRememberedSession(){
+  try { return safeJSON_(localStorage.getItem(REMEMBER_KEY), null); } catch (e) { return null; }
 }
 
 // Pulls live data from the Google Sheet backend into the DATA object
@@ -496,6 +511,11 @@ function initAuth(){
     if (!apiConfigured()) {
       // No backend configured yet — keep the original demo behavior.
       STATE.role = $("#login-role").value;
+      if ($("#login-remember").checked) {
+        saveRememberedSession({ mode: "demo", role: STATE.role });
+      } else {
+        clearRememberedSession();
+      }
       enterApp();
       return;
     }
@@ -511,6 +531,11 @@ function initAuth(){
         name: acc.Name, role: roleLabel_(role), empId: acc.EmployeeID,
         dept: acc.Department, position: acc.Position || "", initials: initialsFrom_(acc.Name),
       };
+      if ($("#login-remember").checked) {
+        saveRememberedSession({ mode: "backend", role, user: DATA.users[role] });
+      } else {
+        clearRememberedSession();
+      }
       await loadBackendData();
       enterApp();
     } finally {
@@ -613,6 +638,7 @@ function logout(){
   $("#app-shell").classList.add("hidden");
   $("#auth-screen").classList.remove("hidden");
   $("#login-form").reset();
+  clearRememberedSession();
   closeSidebar();
   stopSync();
 }
@@ -1659,9 +1685,21 @@ function initChrome(){
 /* ---------------------------------------------------------------
    25. INIT
    --------------------------------------------------------------- */
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", async ()=>{
   applyLogo();
   initAuth();
   initModals();
   initChrome();
+
+  const remembered = loadRememberedSession();
+  if (remembered) {
+    STATE.role = remembered.role;
+    if (remembered.mode === "backend") {
+      DATA.users[remembered.role] = remembered.user;
+      if (apiConfigured()) {
+        try { await loadBackendData(); } catch (e) { /* fall through with cached data */ }
+      }
+    }
+    enterApp();
+  }
 });
