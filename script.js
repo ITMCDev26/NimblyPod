@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbzaJnGgWjJxvCdHhG0oHNwkA9FBUAtNctSBGgU4icFIsusyBkk7r06TcYFEXjSxwyJVwQ/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbwYyuCWfHRwav9yMDnErXDdWlaLdqkf1QJH9IgbbWkqOmDtcz5Taylm1_aySQSB4gV4Sw/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -139,8 +139,17 @@ async function loadBackendData(){
 
   DATA.announcements = (res.announcements || []).map(a => ({
     id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
-    author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
+    author: a.Author, date: fmtDate_(a.Date),
+    attachmentUrl: "", attachmentName: "", attachmentMime: "",
   })).reverse();
+
+  // Announcements carry their attachment via a separate AnnouncementAttachments
+  // tab (see Code.gs) so match it back onto each announcement by its ID.
+  (res.announcementAttachments || []).forEach(att => {
+    const key = String(att.AnnouncementID || "").trim();
+    const a = DATA.announcements.find(x => String(x.id || "").trim() === key);
+    if (a && att.FileUrl) { a.attachmentUrl = att.FileUrl; a.attachmentName = att.FileName; a.attachmentMime = att.MimeType || ""; }
+  });
 
   DATA.appointments = (res.appointments || []).map(a => ({
     id: a.ID, employee: a.Employee, employeeEmail: a.EmployeeEmail,
@@ -342,12 +351,12 @@ const DATA = {
   succession: [],
 
   announcements: [
-    { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026", priority:"High" },
-    { id:2, title:"Revised Leave-Filing Cut-off", category:"Policy", desc:"Starting October 1, leave requests must be filed at least 5 working days in advance except for emergency leave.", author:"Marisol Reyes", date:"Sep 08, 2026", priority:"High" },
-    { id:3, title:"Data Privacy Refresher — Register Now", category:"Training", desc:"Mandatory refresher for all employees handling customer data. Two sessions available this month.", author:"Kyle Fernandez", date:"Sep 05, 2026", priority:"Normal" },
-    { id:4, title:"HR Helpdesk Hours Extended", category:"HR", desc:"The HR helpdesk is now open until 8:00 PM on weekdays to better support night-shift teams.", author:"Bien Santos", date:"Sep 03, 2026", priority:"Normal" },
-    { id:5, title:"Foundation Day Celebration", category:"Events", desc:"Mark your calendars \u2014 our 12th Foundation Day celebration is happening this October with games, food, and awards.", author:"Rosario Viray", date:"Aug 29, 2026", priority:"Normal" },
-    { id:6, title:"Building B Fire Drill", category:"Emergency", desc:"A scheduled fire drill will take place in Building B on September 15 at 3:00 PM. Please follow floor marshal instructions.", author:"Admin Root", date:"Aug 27, 2026", priority:"High" },
+    { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026" },
+    { id:2, title:"Revised Leave-Filing Cut-off", category:"Policy", desc:"Starting October 1, leave requests must be filed at least 5 working days in advance except for emergency leave.", author:"Marisol Reyes", date:"Sep 08, 2026" },
+    { id:3, title:"Data Privacy Refresher — Register Now", category:"Training", desc:"Mandatory refresher for all employees handling customer data. Two sessions available this month.", author:"Kyle Fernandez", date:"Sep 05, 2026" },
+    { id:4, title:"HR Helpdesk Hours Extended", category:"HR", desc:"The HR helpdesk is now open until 8:00 PM on weekdays to better support night-shift teams.", author:"Bien Santos", date:"Sep 03, 2026" },
+    { id:5, title:"Foundation Day Celebration", category:"Events", desc:"Mark your calendars \u2014 our 12th Foundation Day celebration is happening this October with games, food, and awards.", author:"Rosario Viray", date:"Aug 29, 2026" },
+    { id:6, title:"Building B Fire Drill", category:"Emergency", desc:"A scheduled fire drill will take place in Building B on September 15 at 3:00 PM. Please follow floor marshal instructions.", author:"Admin Root", date:"Aug 27, 2026" },
   ],
 
   appointments: [
@@ -1144,19 +1153,34 @@ function renderLearning(){
 /* ---------------------------------------------------------------
    14. RENDER: ANNOUNCEMENTS
    --------------------------------------------------------------- */
+// Category is free text typed by HR, so "HR" and "hr " count as the same one.
+function annCategory_(a){ return String((a && a.category) || "").trim() || "Uncategorized"; }
+
 function renderAnnouncements(){
-  const cats = ["All","Company","HR","Training","Policy","Events","Emergency"];
-  $("#ann-filters").innerHTML = cats.map(c=>`<button class="chip ${STATE.annFilter===c?'active':''}" data-cat="${c}">${c}</button>`).join("");
+  // Filter chips are built from whichever categories HR has actually used.
+  const seen = new Map(); // lower-case key -> label as first typed
+  DATA.announcements.forEach(a=>{
+    const label = annCategory_(a);
+    if (!seen.has(label.toLowerCase())) seen.set(label.toLowerCase(), label);
+  });
+  const cats = ["All", ...[...seen.values()].sort((x,y)=> x.localeCompare(y))];
+  if (STATE.annFilter !== "All" && !seen.has(String(STATE.annFilter).toLowerCase())) STATE.annFilter = "All";
+  const isActive = c => String(c).toLowerCase() === String(STATE.annFilter).toLowerCase();
+
+  $("#ann-filters").innerHTML = cats.map(c=>`<button class="chip ${isActive(c)?'active':''}" data-cat="${escapeHtml_(c)}">${escapeHtml_(c)}</button>`).join("");
   $all("[data-cat]").forEach(chip=> chip.addEventListener("click", ()=>{ STATE.annFilter = chip.dataset.cat; renderAnnouncements(); }));
 
-  const list = DATA.announcements.filter(a=> STATE.annFilter==="All" || a.category===STATE.annFilter);
-  $("#ann-grid").innerHTML = list.map(a=>`
-    <div class="ann-card" data-ann="${a.id}">
-      <div class="ann-top"><span class="badge badge-green">${a.category}</span>${a.priority==="High" ? '<span class="badge badge-red">High priority</span>' : ''}</div>
-      <h4>${a.title}</h4>
-      <p>${a.desc.slice(0,90)}${a.desc.length>90 ? '\u2026' : ''}</p>
-      <div class="ann-meta">${a.author} &middot; ${a.date}</div>
-    </div>`).join("") || `<p style="color:var(--ink-soft);">No announcements in this category yet.</p>`;
+  const list = DATA.announcements.filter(a=> STATE.annFilter==="All" || annCategory_(a).toLowerCase() === String(STATE.annFilter).toLowerCase());
+  $("#ann-grid").innerHTML = list.map(a=>{
+    const desc = String(a.desc || "");
+    return `
+    <div class="ann-card" data-ann="${escapeHtml_(a.id)}">
+      <div class="ann-top"><span class="badge badge-green">${escapeHtml_(annCategory_(a))}</span></div>
+      <h4>${escapeHtml_(a.title)}</h4>
+      <p>${escapeHtml_(desc.slice(0,90))}${desc.length>90 ? '\u2026' : ''}</p>
+      <div class="ann-meta">${escapeHtml_(a.author)} &middot; ${escapeHtml_(a.date)}${a.attachmentUrl ? " &middot; 📎" : ""}</div>
+    </div>`;
+  }).join("") || `<p style="color:var(--ink-soft);">No announcements in this category yet.</p>`;
 
   $all("[data-ann]").forEach(card=> card.addEventListener("click", ()=> openAnnouncement(Number(card.dataset.ann))));
 }
@@ -1164,12 +1188,81 @@ function renderAnnouncements(){
 function openAnnouncement(id){
   const a = DATA.announcements.find(x=>x.id===id);
   if(!a) return;
+  openModal("modal-announcement"); // opens first: closeModals() clears the body
+
+  // Same viewer as the case review: the file opens right inside the announcement.
+  const attachmentHtml = a.attachmentUrl ? `
+    <div class="case-attachment">
+      <div class="case-attachment-head">
+        <strong>📎 ${escapeHtml_(a.attachmentName || "Attachment")}</strong>
+        <span class="case-attachment-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="toggle-ann-attachment">Hide</button>
+          <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(a.attachmentUrl))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+        </span>
+      </div>
+      <div class="case-attachment-preview" id="ann-attachment-preview">${attachmentPreviewHtml_(a.attachmentUrl, a.attachmentName, a.attachmentMime, "50vh")}</div>
+    </div>` : "";
+
   $("#ann-modal-title").textContent = a.title;
   $("#ann-modal-body").innerHTML = `
-    <div class="ann-top" style="margin-bottom:12px;"><span class="badge badge-green">${a.category}</span>${a.priority==="High" ? '<span class="badge badge-red">High priority</span>' : ''}</div>
-    <p style="line-height:1.6;margin-bottom:14px;">${a.desc}</p>
-    <p style="font-size:12.5px;color:var(--ink-soft);">Posted by ${a.author} on ${a.date}</p>`;
-  openModal("modal-announcement");
+    <div class="ann-top" style="margin-bottom:12px;"><span class="badge badge-green">${escapeHtml_(annCategory_(a))}</span></div>
+    <p style="line-height:1.6;margin-bottom:14px;white-space:pre-line;">${escapeHtml_(a.desc)}</p>
+    ${attachmentHtml}
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:14px;">Posted by ${escapeHtml_(a.author)} on ${escapeHtml_(a.date)}</p>`;
+
+  const toggleBtn = $("#toggle-ann-attachment");
+  if (toggleBtn) toggleBtn.addEventListener("click", ()=>{
+    const pane = $("#ann-attachment-preview");
+    const hidden = pane.classList.toggle("hidden");
+    toggleBtn.textContent = hidden ? "Show" : "Hide";
+  });
+}
+
+// The "New announcement" form markup lives in index.html. This makes sure the
+// form has a free-text Category box (not a dropdown), no Priority field, and an
+// Attachment picker. If index.html already has them, it leaves everything alone.
+function setupAnnouncementForm_(){
+  const form = $("#ann-new-form");
+  if (!form) return;
+
+  // Category: dropdown -> a box HR can type into
+  const cat = $("#ann-category");
+  if (cat && cat.tagName === "SELECT") {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "ann-category";
+    input.required = true;
+    input.maxLength = 40;
+    input.autocomplete = "off";
+    input.placeholder = "Type a category, e.g. Company, HR, Training";
+    cat.replaceWith(input);
+  } else if (cat && !cat.placeholder) {
+    cat.placeholder = "Type a category, e.g. Company, HR, Training";
+  }
+
+  // Priority: removed
+  const pri = $("#ann-priority");
+  if (pri) {
+    const wrap = pri.closest("label");
+    if (wrap && !wrap.contains($("#ann-category"))) wrap.remove(); else pri.remove();
+  }
+
+  // Attachment: added (after the description box)
+  if (!$("#ann-attachment")) {
+    const field = document.createElement("label");
+    field.className = "field";
+    field.innerHTML = `<span>Attachment (optional)</span>
+      <input type="file" id="ann-attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+      <small id="ann-attachment-name" style="color:var(--ink-soft);"></small>`;
+    const descField = $("#ann-desc") ? $("#ann-desc").closest("label") : null;
+    if (descField) descField.insertAdjacentElement("afterend", field);
+    else form.insertBefore(field, form.lastElementChild);
+  }
+  $("#ann-attachment").addEventListener("change", ()=>{
+    const f = $("#ann-attachment").files[0];
+    const nameEl = $("#ann-attachment-name");
+    if (nameEl) nameEl.textContent = f ? f.name : "";
+  });
 }
 
 /* ---------------------------------------------------------------
@@ -1610,6 +1703,8 @@ function closeModals(){
   $all(".modal").forEach(m=>m.classList.remove("open"));
   const attBody = $("#case-attachment-body");
   if (attBody) attBody.innerHTML = ""; // stop any preview from loading in the background
+  const annBody = $("#ann-modal-body");
+  if (annBody) annBody.innerHTML = "";
 }
 
 // Shows an uploaded case document in a popup, without leaving the page or
@@ -1749,31 +1844,71 @@ function initModals(){
     if(STATE.currentView === "cases") renderCases();
   });
 
+  setupAnnouncementForm_();
   $("#ann-new-btn").addEventListener("click", ()=> openModal("modal-ann-new"));
   $("#ann-new-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    const payload = {
-      title: $("#ann-title").value, category: $("#ann-category").value,
-      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name,
-      priority: $("#ann-priority").value === "High" ? "High" : "Normal",
-    };
 
-    if (apiConfigured()) {
-      const res = await apiPost("addAnnouncement", payload);
-      if (!res.ok) { toast(res.error || "Couldn't post announcement"); return; }
-      const a = res.announcement;
-      DATA.announcements.unshift({
-        id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
-        author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
-      });
-    } else {
-      const id = Math.max(0, ...DATA.announcements.map(a=>a.id)) + 1;
-      DATA.announcements.unshift({ id, date:"Just now", ...payload });
+    const category = $("#ann-category").value.trim();
+    if (!category) { toast("Please type a category for this announcement"); return; }
+
+    const file = $("#ann-attachment").files[0];
+    const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8MB — keep sheet/Apps Script requests small
+    if (file && file.size > MAX_ATTACHMENT_BYTES) {
+      toast("That file is too big — please attach something under 8MB");
+      return;
     }
 
-    toast("Announcement posted");
+    const payload = {
+      title: $("#ann-title").value, category,
+      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name,
+    };
+    const attachmentMime = file ? (file.type || "application/octet-stream") : "";
+    if (file) {
+      payload.attachmentName = file.name;
+      payload.attachmentMime = attachmentMime;
+      payload.attachmentData = await fileToBase64_(file);
+    }
+
+    // Uploading can take a few seconds — stop a double click from posting twice.
+    const submitBtn = e.submitter || $("#ann-new-form").querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      if (apiConfigured()) {
+        const res = await apiPost("addAnnouncement", payload);
+        if (!res.ok) { toast(res.error || "Couldn't post announcement"); return; }
+        const a = res.announcement;
+        DATA.announcements.unshift({
+          id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
+          author: a.Author, date: fmtDate_(a.Date),
+          attachmentUrl: res.attachmentUrl || "", attachmentName: res.attachmentName || "",
+          attachmentMime,
+        });
+        if (file && res.attachmentError) {
+          toast(`Announcement posted, but the attachment wasn't saved: ${res.attachmentError}`);
+        } else if (file && !res.attachmentUrl) {
+          toast("Announcement posted, but the backend didn't save the attachment. Redeploy your Apps Script (Deploy > Manage deployments > Edit > New version).");
+        } else {
+          toast("Announcement posted");
+        }
+      } else {
+        const id = Math.max(0, ...DATA.announcements.map(a=>a.id)) + 1;
+        DATA.announcements.unshift({
+          id, date:"Just now", title: payload.title, category, desc: payload.desc, author: payload.author,
+          // no backend configured — attachment only lasts for this browser session
+          attachmentUrl: file ? URL.createObjectURL(file) : "", attachmentName: file ? file.name : "",
+          attachmentMime,
+        });
+        toast("Announcement posted");
+      }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+
     closeModals();
     $("#ann-new-form").reset();
+    const nameEl = $("#ann-attachment-name");
+    if (nameEl) nameEl.textContent = "";
     if(STATE.currentView === "announcements") renderAnnouncements();
   });
 
