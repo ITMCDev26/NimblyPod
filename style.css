@@ -639,3 +639,15 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 @media (prefers-reduced-motion: reduce){
   *{ animation:none !important; transition:none !important; }
 }
+
+
+/* ============================================================
+   CASE REVIEW — inline attachment
+   ============================================================ */
+#modal-case{ max-width:760px; }
+.case-attachment{ border:1px solid var(--line); border-radius:var(--radius-md); padding:12px; margin:14px 0; background:var(--bg); }
+.case-attachment-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; font-size:13px; }
+.case-attachment-head strong{ overflow-wrap:anywhere; }
+.case-attachment-actions{ display:flex; gap:8px; align-items:center; }
+.case-attachment-preview.hidden{ display:none; }
+.case-attachment-empty{ font-size:12.8px; color:var(--ink-soft); margin:12px 0; }

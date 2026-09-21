@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbyG7F2nSO8pK6nm-1Qx6TcmY7cyLTDVaUymotgG5JEMqD6-58jlp-evded8aeVhbfn0/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbzaJnGgWjJxvCdHhG0oHNwkA9FBUAtNctSBGgU4icFIsusyBkk7r06TcYFEXjSxwyJVwQ/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -57,6 +57,48 @@ function fmtDate_(v){
 
 function safeJSON_(str, fallback){
   try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+function escapeHtml_(v){
+  return String(v == null ? "" : v).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch]);
+}
+
+// Builds the HTML that displays an uploaded case document (image, PDF, Drive
+// file...). Shared by the case review modal and the standalone popup.
+function attachmentPreviewHtml_(url, name, mime, heightCss){
+  const safeUrl = escapeHtml_(url);
+  const safeName = escapeHtml_(name || "Attachment");
+  const isDriveLink = url.includes("drive.google.com");
+  const isImage = (mime || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|heic)$/i.test(name || "");
+  const isPdf = (mime || "") === "application/pdf" || /\.pdf$/i.test(name || "");
+
+  if (isDriveLink) {
+    // Drive's own preview endpoint renders images, PDFs, and Office docs alike.
+    return `<iframe src="${safeUrl}" style="width:100%;height:${heightCss};border:0;border-radius:8px;" allow="autoplay"></iframe>`;
+  }
+  if (isImage) {
+    return `<img src="${safeUrl}" alt="${safeName}" style="max-width:100%;max-height:${heightCss};display:block;margin:0 auto;border-radius:8px;" />`;
+  }
+  if (isPdf) {
+    return `<iframe src="${safeUrl}" style="width:100%;height:${heightCss};border:0;border-radius:8px;"></iframe>`;
+  }
+  return `<div class="empty-note" style="padding:34px 16px;">This file type can't be previewed here. Use "Open in new tab" to view it.</div>`;
+}
+
+// The /preview link is for embedding; the normal viewer page is /view.
+function attachmentOpenUrl_(url){
+  return url.includes("drive.google.com") ? url.replace(/\/preview$/, "/view") : url;
+}
+
+// Reads a File into a plain base64 string (no "data:...;base64," prefix)
+// so it can be JSON-posted to Apps Script and saved to Drive there.
+function fileToBase64_(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 }
 
 // "Remember me" — persists just enough to skip the login form next visit.
@@ -108,10 +150,19 @@ async function loadBackendData(){
   }));
 
   DATA.cases = (res.cases || []).map(c => ({
-    number: c.Number, employee: c.Employee, category: c.Category, status: c.Status,
-    priority: c.Priority, assigned: c.Assigned, description: c.Description,
+    number: c.Number, employee: c.Employee, status: c.Status,
+    category: c.Category, assigned: c.Assigned, description: c.Description,
     history: safeJSON_(c.HistoryJSON, []),
+    attachmentUrl: "", attachmentName: "", attachmentMime: "",
   }));
+
+  // Cases carry their attachment via a separate CaseAttachments tab (see
+  // Code.gs) so match it back onto each case by case number.
+  (res.caseAttachments || []).forEach(att => {
+    const key = String(att.CaseNumber || "").trim();
+    const c = DATA.cases.find(x => String(x.number || "").trim() === key);
+    if (c && att.FileUrl) { c.attachmentUrl = att.FileUrl; c.attachmentName = att.FileName; c.attachmentMime = att.MimeType || ""; }
+  });
 
   DATA.requests = res.requests || [];
 
@@ -308,16 +359,16 @@ const DATA = {
   ],
 
   cases: [
-    { number:"C-1042", employee:"Aira Bautista", category:"Attendance", status:"Resolved", priority:"Medium", assigned:"Marisol Reyes",
+    { number:"C-1042", employee:"Aira Bautista", category:"Attendance", status:"Resolved", assigned:"Marisol Reyes",
       description:"Repeated tardiness over two pay periods; requested clarification on shifting schedule accommodations.",
       history:[ {text:"Case filed", time:"Aug 20, 2026"}, {text:"Consultation scheduled", time:"Aug 22, 2026"}, {text:"Resolved \u2014 schedule shift approved", time:"Sep 09, 2026"} ] },
-    { number:"C-1051", employee:"Sam Ilagan", category:"Workplace conduct", status:"Under Review", priority:"High", assigned:"Bien Santos",
+    { number:"C-1051", employee:"Sam Ilagan", category:"Workplace conduct", status:"Under Review", assigned:"Bien Santos",
       description:"Reported disagreement between shift-mates escalated during a floor huddle.",
       history:[ {text:"Case filed", time:"Sep 04, 2026"}, {text:"Statements collected from both parties", time:"Sep 06, 2026"} ] },
-    { number:"C-1055", employee:"Noel Trinidad", category:"Compensation dispute", status:"Open", priority:"Medium", assigned:"Marisol Reyes",
+    { number:"C-1055", employee:"Noel Trinidad", category:"Compensation dispute", status:"Open", assigned:"Marisol Reyes",
       description:"Discrepancy flagged between night-differential pay and posted schedule.",
       history:[ {text:"Case filed", time:"Sep 09, 2026"} ] },
-    { number:"C-1049", employee:"Patrice Lim", category:"Well-being check-in", status:"Action Required", priority:"Low", assigned:"Kyle Fernandez",
+    { number:"C-1049", employee:"Patrice Lim", category:"Well-being check-in", status:"Action Required", assigned:"Kyle Fernandez",
       description:"Self-referred check-in following extended overtime during month-end close.",
       history:[ {text:"Case filed", time:"Sep 01, 2026"}, {text:"Initial consultation completed", time:"Sep 03, 2026"}, {text:"Workload review pending manager input", time:"Sep 08, 2026"} ] },
   ],
@@ -1260,8 +1311,9 @@ function renderCases(){
       <div class="kan-col-head"><h4>${stage}</h4><span class="kan-count">${cards.length}</span></div>
       ${cards.map(c=>`
         <div class="kan-card" data-case="${c.number}">
-          <strong>${c.number} &middot; ${c.category}</strong>
-          <div class="kan-meta">${c.employee} &middot; ${c.priority} priority</div>
+          <strong>${c.number}</strong>
+          <p style="font-size:12.5px;color:#6b7280;margin:4px 0 0;line-height:1.4;">${(c.description||"").slice(0,70)}${(c.description||"").length>70?"…":""}</p>
+          <div class="kan-meta">${c.employee} &middot; ${c.category || "Uncategorized"}${c.attachmentUrl ? " &middot; 📎" : ""}</div>
           <span class="badge ${statusBadgeClass(c.status)}">${c.assigned}</span>
         </div>`).join("")}
     </div>`;
@@ -1276,20 +1328,41 @@ function openCase(number){
   $("#case-modal-title").textContent = `Case ${c.number}`;
   const nextIdx = CASE_STAGES.indexOf(c.status) + 1;
   const nextStage = CASE_STAGES[nextIdx];
+
+  // The uploaded document opens right inside the case review, so HR can read
+  // it while deciding what to do with the case.
+  const attachmentHtml = c.attachmentUrl ? `
+    <div class="case-attachment">
+      <div class="case-attachment-head">
+        <strong>📎 ${escapeHtml_(c.attachmentName || "Attachment")}</strong>
+        <span class="case-attachment-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="toggle-case-attachment">Hide</button>
+          <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(c.attachmentUrl))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+        </span>
+      </div>
+      <div class="case-attachment-preview" id="case-attachment-preview">${attachmentPreviewHtml_(c.attachmentUrl, c.attachmentName, c.attachmentMime, "50vh")}</div>
+    </div>` : `<p class="case-attachment-empty">No attachment on this case.</p>`;
   $("#case-modal-body").innerHTML = `
     <div class="case-detail-grid">
       <div><dt>Employee</dt><dd>${c.employee}</dd></div>
-      <div><dt>Category</dt><dd>${c.category}</dd></div>
       <div><dt>Assigned HR</dt><dd>${c.assigned}</dd></div>
-      <div><dt>Priority</dt><dd>${c.priority}</dd></div>
+      <div><dt>Category</dt><dd>${c.category || "Uncategorized"}</dd></div>
       <div style="grid-column:1/-1;"><dt>Status</dt><dd><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></dd></div>
     </div>
     <p style="line-height:1.6;font-size:13.8px;">${c.description}</p>
+    ${attachmentHtml}
     <ul class="case-history">${c.history.map(h=>`<li><span class="dot-ic"></span><div class="act-text"><strong>${h.text}</strong><span class="act-time">${h.time}</span></div></li>`).join("")}</ul>
     <div class="case-actions-row">
       ${["Consultation","Interview","Mediation","Policy Review"].map(a=>`<button class="btn btn-ghost btn-sm" data-caseaction="${a}">${a}</button>`).join("")}
       ${nextStage ? `<button class="btn btn-primary btn-sm" data-advancecase="${nextStage}">Move to ${nextStage}</button>` : ""}
     </div>`;
+
+  const toggleBtn = $("#toggle-case-attachment");
+  if (toggleBtn) toggleBtn.addEventListener("click", ()=>{
+    const pane = $("#case-attachment-preview");
+    const hidden = pane.classList.toggle("hidden");
+    toggleBtn.textContent = hidden ? "Show" : "Hide";
+  });
 
   $all("[data-caseaction]").forEach(btn=> btn.addEventListener("click", ()=>{
     c.history.push({ text:`${btn.dataset.caseaction} logged`, time:"Just now" });
@@ -1535,6 +1608,28 @@ function openModal(id){
 function closeModals(){
   $("#modal-overlay").classList.add("hidden");
   $all(".modal").forEach(m=>m.classList.remove("open"));
+  const attBody = $("#case-attachment-body");
+  if (attBody) attBody.innerHTML = ""; // stop any preview from loading in the background
+}
+
+// Shows an uploaded case document in a popup, without leaving the page or
+// reloading anything else. Close it with the × / Cancel like any modal.
+// Picks a preview that actually renders for the file type, and always
+// includes a plain "open" link so the file is reachable even if the
+// inline preview can't load (e.g. an org's Drive sharing policy, or a
+// file type the browser can't preview inline).
+function openCaseAttachment(url, name, mime){
+  $("#case-attachment-title").textContent = name || "Attachment";
+  const body = $("#case-attachment-body");
+
+  if (!url){ body.innerHTML = "<p>No attachment on file.</p>"; openModal("modal-case-attachment"); return; }
+
+  body.innerHTML = `
+    ${attachmentPreviewHtml_(url, name, mime, "65vh")}
+    <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+      <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(url))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+    </div>`;
+  openModal("modal-case-attachment");
 }
 
 function initModals(){
@@ -1592,35 +1687,65 @@ function initModals(){
   });
 
   $("#case-new-btn").addEventListener("click", ()=> openModal("modal-case-new"));
+
+  $("#case-attachment").addEventListener("change", ()=>{
+    const f = $("#case-attachment").files[0];
+    $("#case-attachment-name").textContent = f ? f.name : "";
+  });
+
   $("#case-new-form").addEventListener("submit", async e=>{
     e.preventDefault();
+    const file = $("#case-attachment").files[0];
+    const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8MB — keep sheet/Apps Script requests small
+    if (file && file.size > MAX_ATTACHMENT_BYTES) {
+      toast("That file is too big — please attach something under 8MB");
+      return;
+    }
+
     const payload = {
-      employee: DATA.users[STATE.role].name, category: $("#case-category").value,
-      priority: $("#case-priority").value, description: $("#case-desc").value,
+      employee: DATA.users[STATE.role].name,
+      category: $("#case-category").value, description: $("#case-desc").value,
     };
+    if (file) {
+      payload.attachmentName = file.name;
+      payload.attachmentMime = file.type || "application/octet-stream";
+      payload.attachmentData = await fileToBase64_(file);
+    }
 
     if (apiConfigured()) {
       const res = await apiPost("addCase", payload);
       if (!res.ok) { toast(res.error || "Couldn't file case"); return; }
       const c = res.case;
       DATA.cases.unshift({
-        number: c.Number, employee: c.Employee, category: c.Category, status: c.Status,
-        priority: c.Priority, assigned: c.Assigned, description: c.Description,
+        number: c.Number, employee: c.Employee, status: c.Status,
+        category: c.Category, assigned: c.Assigned, description: c.Description,
         history: safeJSON_(c.HistoryJSON, []),
+        attachmentUrl: res.attachmentUrl || "", attachmentName: res.attachmentName || "",
+        attachmentMime: payload.attachmentMime || "",
       });
-      toast(`Case ${c.Number} filed`);
+      if (file && res.attachmentError) {
+        toast(`Case ${c.Number} filed, but the attachment wasn't saved: ${res.attachmentError}`);
+      } else if (file && !res.attachmentUrl) {
+        toast(`Case ${c.Number} filed, but the backend didn't save the attachment. Redeploy your Apps Script (Deploy > Manage deployments > Edit > New version).`);
+      } else {
+        toast(`Case ${c.Number} filed`);
+      }
     } else {
       const number = "C-" + (1055 + DATA.cases.length + 1);
       DATA.cases.unshift({
-        number, employee: payload.employee, category: payload.category,
-        status:"Open", priority: payload.priority, assigned:"Marisol Reyes",
+        number, employee: payload.employee,
+        status:"Open", category: payload.category, assigned:"Marisol Reyes",
         description: payload.description, history:[{text:"Case filed", time:"Just now"}],
+        // no backend configured — attachment only lasts for this browser session
+        attachmentUrl: file ? URL.createObjectURL(file) : "", attachmentName: file ? file.name : "",
+        attachmentMime: file ? (file.type || "application/octet-stream") : "",
       });
       toast(`Case ${number} filed`);
     }
 
     closeModals();
     $("#case-new-form").reset();
+    $("#case-attachment-name").textContent = "";
     if(STATE.currentView === "cases") renderCases();
   });
 

@@ -674,17 +674,22 @@
     <div class="modal-head"><h3>File a case</h3><button class="modal-close" data-close>&times;</button></div>
     <form class="modal-body" id="case-new-form">
       <label class="field"><span>Category</span>
-        <select id="case-category">
-          <option>Grievance</option><option>Workplace conduct</option><option>Attendance</option><option>Compensation dispute</option><option>Harassment concern</option><option>Policy violation</option><option>Well-being check-in</option>
-        </select>
-      </label>
-      <label class="field"><span>Priority</span>
-        <select id="case-priority"><option>Low</option><option selected>Medium</option><option>High</option></select>
+        <input type="text" id="case-category" placeholder="e.g. Attendance, Workplace conduct, Compensation dispute" required />
       </label>
       <label class="field"><span>Description</span><textarea id="case-desc" rows="4" required></textarea></label>
+      <label class="field"><span>Attachment (optional)</span>
+        <input type="file" id="case-attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic" />
+        <span id="case-attachment-name" style="font-size:12px;color:#7c8b86;display:block;margin-top:4px;"></span>
+      </label>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">File case</button></div>
     </form>
   </div>
+
+  <div class="modal" id="modal-case-attachment">
+    <div class="modal-head"><h3 id="case-attachment-title">Attachment</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body" id="case-attachment-body" style="min-height:65vh;"></div>
+  </div>
+
 
   <div class="modal" id="modal-announcement">
     <div class="modal-head"><h3 id="ann-modal-title">Announcement</h3><button class="modal-close" data-close>&times;</button></div>
