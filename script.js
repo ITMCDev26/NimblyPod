@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbwYyuCWfHRwav9yMDnErXDdWlaLdqkf1QJH9IgbbWkqOmDtcz5Taylm1_aySQSB4gV4Sw/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbwM6M1yY6x4FUdW-48FL5lYQNQzqi6I_Tyt0ZEBOVg7lj-K9kmglSCpfCDZtB9LYzgs/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -173,6 +173,16 @@ async function loadBackendData(){
     if (c && att.FileUrl) { c.attachmentUrl = att.FileUrl; c.attachmentName = att.FileName; c.attachmentMime = att.MimeType || ""; }
   });
 
+  // Department case files (public, viewable by anyone who opens that department's tab).
+  // Only overwrite local data when the backend actually returns the list.
+  if (Array.isArray(res.caseFiles)) {
+    DATA.caseFiles = res.caseFiles.map(f => ({
+      id: f.ID, dept: f.Department, category: f.Category, desc: f.Description,
+      by: f.UploadedBy, date: fmtDate_(f.Date),
+      url: f.FileUrl, name: f.FileName, mime: f.MimeType || "application/pdf",
+    })).reverse();
+  }
+
   DATA.requests = res.requests || [];
 
   if (res.employees && res.employees.length){
@@ -193,6 +203,8 @@ async function loadBackendData(){
    1. DUMMY DATA
    --------------------------------------------------------------- */
 const DATA = {
+  caseFiles: [],
+  handbookDocId: "1chXyVz-u8SzVR4KiA4OiOIT2xuAFabk_FEMH2B9-_vw",
   perfKpis: [
     { label:"Avg. rating (Q3)", value:"4.2 / 5" },
     { label:"Goals on track", value:"87%" },
@@ -798,6 +810,70 @@ function renderView(viewId){
     backup: renderBackup, settings: renderSettings, help: ()=>{},
   };
   (map[viewId] || function(){})();
+  renderDeptCaseFiles(viewId);
+}
+
+/* ---------------------------------------------------------------
+   DEPARTMENT CASE FILES
+   Each department tab (and its matching main-nav view) shows the
+   public case files for that department. Members of the department
+   (and admins) also get an "Upload case file" button.
+   --------------------------------------------------------------- */
+const VIEW_TO_DEPT = {
+  recruitment: "Talent Acquisition & Workforce Planning",
+  learning:    "Learning, Training & Development",
+  performance: "Performance & Rewards",
+  wellbeing:   "Employee Relations & Well-being",
+  analytics:   "HR Operations, Analytics & Policy",
+};
+
+function normDept_(d){ return String(d || "").toLowerCase().replace(/\s+/g, " ").trim(); }
+
+function canUploadCaseFile_(dept){
+  if (STATE.role === "admin") return true;
+  const u = DATA.users[STATE.role] || {};
+  return normDept_(u.dept) === normDept_(dept);
+}
+
+function renderDeptCaseFiles(viewId){
+  const dept = VIEW_TO_DEPT[viewId];
+  const section = $(`#view-${viewId}`);
+  if (!dept || !section) return;
+
+  let panel = $(`#casefiles-${viewId}`);
+  if (!panel) {
+    panel = el("div", "panel dept-casefiles");
+    panel.id = `casefiles-${viewId}`;
+    section.appendChild(panel);
+  }
+
+  const files = DATA.caseFiles.filter(f => normDept_(f.dept) === normDept_(dept));
+  const canUpload = canUploadCaseFile_(dept);
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div><h3>Case files</h3><p class="panel-sub">${escapeHtml_(dept)} &middot; open to everyone</p></div>
+      ${canUpload ? `<button type="button" class="btn btn-primary btn-sm" data-casefile-upload>+ Upload case file</button>` : ""}
+    </div>
+    ${files.length ? `<div class="casefile-list">${files.map(f => `
+      <div class="casefile-card">
+        <h4>${escapeHtml_(f.category)}</h4>
+        <p>${escapeHtml_(f.desc)}</p>
+        <span class="casefile-meta">Uploaded by ${escapeHtml_(f.by)}${f.date ? " &middot; " + escapeHtml_(f.date) : ""}</span>
+        <button type="button" class="btn btn-ghost btn-sm" data-casefile-view="${escapeHtml_(f.id)}">View ${escapeHtml_(f.category)}</button>
+      </div>`).join("")}</div>`
+    : `<p class="empty-note">No case files have been published for this department yet.</p>`}`;
+
+  const up = $("[data-casefile-upload]", panel);
+  if (up) up.addEventListener("click", () => {
+    STATE.casefileDept = dept;
+    $("#casefile-modal-title").textContent = `Upload case file \u2014 ${DATA.deptInfo[dept].short}`;
+    openModal("modal-casefile-new");
+  });
+  $all("[data-casefile-view]", panel).forEach(btn => btn.addEventListener("click", () => {
+    const f = DATA.caseFiles.find(x => String(x.id) === btn.dataset.casefileView);
+    if (f) openCaseAttachment(f.url, `${f.category} \u2014 ${f.name || "Case file"}`, f.mime);
+  }));
 }
 
 /* ---------------------------------------------------------------
@@ -1705,6 +1781,8 @@ function closeModals(){
   if (attBody) attBody.innerHTML = ""; // stop any preview from loading in the background
   const annBody = $("#ann-modal-body");
   if (annBody) annBody.innerHTML = "";
+  const hb = $("#handbook-frame");
+  if (hb) hb.innerHTML = "";
 }
 
 // Shows an uploaded case document in a popup, without leaving the page or
@@ -1842,6 +1920,69 @@ function initModals(){
     $("#case-new-form").reset();
     $("#case-attachment-name").textContent = "";
     if(STATE.currentView === "cases") renderCases();
+  });
+
+  /* ---- Department case files: upload ---- */
+  $("#casefile-file").addEventListener("change", ()=>{
+    const f = $("#casefile-file").files[0];
+    $("#casefile-file-name").textContent = f ? f.name : "";
+  });
+  $("#casefile-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const dept = STATE.casefileDept;
+    if (!dept || !canUploadCaseFile_(dept)) { toast("You can only upload case files to your own department"); return; }
+
+    const file = $("#casefile-file").files[0];
+    if (!file) { toast("Please choose a PDF file"); return; }
+    if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) { toast("Only PDF files are allowed"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast("That file is too big \u2014 please upload a PDF under 8MB"); return; }
+
+    const submitBtn = $("#casefile-submit");
+    submitBtn.disabled = true;
+    try {
+      const payload = {
+        department: dept,
+        category: $("#casefile-category").value.trim(),
+        description: $("#casefile-desc").value.trim(),
+        uploadedBy: DATA.users[STATE.role].name,
+        fileName: file.name, mimeType: "application/pdf",
+      };
+      let record;
+      if (apiConfigured()) {
+        payload.fileData = await fileToBase64_(file);
+        const res = await apiPost("addCaseFile", payload);
+        if (!res.ok) {
+          toast(res.error ? `Couldn't upload: ${res.error}` : "Couldn't upload \u2014 update your Apps Script with the addCaseFile action (see CODE_GS_ADDITIONS.gs)");
+          return;
+        }
+        const f = res.caseFile || {};
+        record = { id: f.ID, dept, category: f.Category || payload.category, desc: f.Description || payload.description,
+                   by: f.UploadedBy || payload.uploadedBy, date: fmtDate_(f.Date || new Date()),
+                   url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
+        if (!record.url) { toast("Uploaded, but the backend didn't return a file link"); return; }
+      } else {
+        // no backend configured \u2014 file only lasts for this browser session
+        record = { id: "CF-" + Date.now(), dept, category: payload.category, desc: payload.description,
+                   by: payload.uploadedBy, date: fmtDate_(new Date()),
+                   url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
+      }
+      DATA.caseFiles.unshift(record);
+      toast(`${record.category} published`);
+      closeModals();
+      $("#casefile-form").reset();
+      $("#casefile-file-name").textContent = "";
+      renderDeptCaseFiles(STATE.currentView);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  /* ---- Company Handbook (Organization tab) ---- */
+  $("#handbook-btn").addEventListener("click", ()=>{
+    // /preview is Google's embeddable read-only viewer: no editing, no toolbar.
+    const src = `https://docs.google.com/document/d/${DATA.handbookDocId}/preview`;
+    $("#handbook-frame").innerHTML = `<iframe src="${src}" title="Company Handbook" referrerpolicy="no-referrer"></iframe><div class="handbook-shield"></div>`;
+    openModal("modal-handbook");
   });
 
   setupAnnouncementForm_();

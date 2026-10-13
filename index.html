@@ -241,6 +241,9 @@
 
       <!-- ---------------- ORGANIZATION ---------------- -->
       <section class="view hidden" id="view-organization">
+        <div class="toolbar" style="margin-bottom:12px;">
+          <button class="btn btn-primary btn-sm" id="handbook-btn">&#128216; Company Handbook</button>
+        </div>
         <div class="subtab-bar" id="org-subtabs">
           <button class="tab active" data-orgtab="orgchart">Organizational Chart</button>
           <button class="tab" data-orgtab="reporting">Reporting Relationships</button>
@@ -683,6 +686,33 @@
       </label>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary">File case</button></div>
     </form>
+  </div>
+
+
+  <div class="modal" id="modal-casefile-new">
+    <div class="modal-head"><h3 id="casefile-modal-title">Upload case file</h3><button class="modal-close" data-close>&times;</button></div>
+    <form class="modal-body" id="casefile-form">
+      <label class="field"><span>Category</span>
+        <input type="text" id="casefile-category" placeholder="e.g. Case Study 1" required />
+      </label>
+      <label class="field"><span>Description</span>
+        <textarea id="casefile-desc" rows="4" placeholder="What is this case file about?" required></textarea>
+      </label>
+      <label class="field"><span>PDF file</span>
+        <input type="file" id="casefile-file" accept=".pdf,application/pdf" required />
+        <span id="casefile-file-name" style="font-size:12px;color:#7c8b86;display:block;margin-top:4px;"></span>
+      </label>
+      <p class="panel-note">Once uploaded, anyone who visits this department's tab can view the file.</p>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary" id="casefile-submit">Upload</button></div>
+    </form>
+  </div>
+
+  <div class="modal modal-wide" id="modal-handbook">
+    <div class="modal-head"><h3>Company Handbook</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="handbook-frame" id="handbook-frame"></div>
+      <p class="panel-note" style="margin-top:10px;">View only &mdash; this handbook can't be downloaded.</p>
+    </div>
   </div>
 
   <div class="modal" id="modal-case-attachment">

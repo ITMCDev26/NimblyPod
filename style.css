@@ -651,3 +651,22 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 .case-attachment-actions{ display:flex; gap:8px; align-items:center; }
 .case-attachment-preview.hidden{ display:none; }
 .case-attachment-empty{ font-size:12.8px; color:var(--ink-soft); margin:12px 0; }
+
+
+/* ============================================================
+   DEPARTMENT CASE FILES + COMPANY HANDBOOK
+   ============================================================ */
+#modal-casefile-new{ max-width:520px; }
+#modal-case-attachment{ max-width:900px; }
+.modal-wide{ max-width:980px; }
+.casefile-list{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+.casefile-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px; }
+.casefile-card h4{ font-size:15px; line-height:1.35; }
+.casefile-card p{ font-size:13px; color:var(--ink-soft); line-height:1.5; flex:1; overflow-wrap:anywhere; }
+.casefile-card .casefile-meta{ font-size:11.8px; color:var(--ink-soft); }
+.casefile-card .btn{ align-self:flex-start; }
+.dept-casefiles .panel-head{ align-items:center; gap:10px; flex-wrap:wrap; }
+.handbook-frame{ position:relative; height:72vh; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
+.handbook-frame iframe{ width:100%; height:100%; border:0; display:block; }
+/* sits over the viewer's pop-out icon so the doc can't be opened in Google Docs from here */
+.handbook-shield{ position:absolute; top:0; right:0; width:64px; height:56px; z-index:2; background:transparent; }
