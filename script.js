@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbwM6M1yY6x4FUdW-48FL5lYQNQzqi6I_Tyt0ZEBOVg7lj-K9kmglSCpfCDZtB9LYzgs/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyMSlxx7wcvo77XIbzO_F14Ciw5Rp75dmyM9fyV4IdIGpYQ3FSvj-naINh0B9uv9dTB/exec",
 };
 
 /* ---------------------------------------------------------------
