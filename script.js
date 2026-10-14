@@ -847,7 +847,16 @@ function renderDeptCaseFiles(viewId){
     section.appendChild(panel);
   }
 
-  const files = DATA.caseFiles.filter(f => normDept_(f.dept) === normDept_(dept));
+  // One card per case study (category). Every PDF uploaded under that category
+  // gets its own "View" button. DATA.caseFiles is newest-first.
+  const groups = [], byKey = {};
+  DATA.caseFiles.filter(f => normDept_(f.dept) === normDept_(dept)).forEach(f => {
+    const key = String(f.category || "").trim().toLowerCase();
+    let g = byKey[key];
+    if (!g) { g = byKey[key] = { category: f.category, files: [] }; groups.push(g); }
+    g.files.unshift(f);                       // oldest file first inside a card
+    g.desc = f.desc; g.by = f.by; g.date = f.date;   // ends up as the first upload's details
+  });
   const canUpload = canUploadCaseFile_(dept);
 
   panel.innerHTML = `
@@ -855,12 +864,14 @@ function renderDeptCaseFiles(viewId){
       <div><h3>Case files</h3><p class="panel-sub">${escapeHtml_(dept)} &middot; open to everyone</p></div>
       ${canUpload ? `<button type="button" class="btn btn-primary btn-sm" data-casefile-upload>+ Upload case file</button>` : ""}
     </div>
-    ${files.length ? `<div class="casefile-list">${files.map(f => `
+    ${groups.length ? `<div class="casefile-list">${groups.map(g => `
       <div class="casefile-card">
-        <h4>${escapeHtml_(f.category)}</h4>
-        <p>${escapeHtml_(f.desc)}</p>
-        <span class="casefile-meta">Uploaded by ${escapeHtml_(f.by)}${f.date ? " &middot; " + escapeHtml_(f.date) : ""}</span>
-        <button type="button" class="btn btn-ghost btn-sm" data-casefile-view="${escapeHtml_(f.id)}">View ${escapeHtml_(f.category)}</button>
+        <h4>${escapeHtml_(g.category)}</h4>
+        <p>${escapeHtml_(g.desc)}</p>
+        <span class="casefile-meta">Uploaded by ${escapeHtml_(g.by)}${g.date ? " &middot; " + escapeHtml_(g.date) : ""}</span>
+        <div class="casefile-files">${g.files.map(f => `
+          <button type="button" class="btn btn-ghost btn-sm" data-casefile-view="${escapeHtml_(f.id)}" title="${escapeHtml_(f.name)}">&#128196; ${escapeHtml_(g.files.length === 1 ? "View " + g.category : "View " + String(f.name || "PDF").replace(/\.pdf$/i, ""))}</button>`).join("")}
+        </div>
       </div>`).join("")}</div>`
     : `<p class="empty-note">No case files have been published for this department yet.</p>`}`;
 
@@ -2041,57 +2052,71 @@ function initModals(){
 
   /* ---- Department case files: upload ---- */
   $("#casefile-file").addEventListener("change", ()=>{
-    const f = $("#casefile-file").files[0];
-    $("#casefile-file-name").textContent = f ? f.name : "";
+    const list = Array.from($("#casefile-file").files);
+    $("#casefile-file-name").innerHTML = list.map(f => "&#128196; " + escapeHtml_(f.name)).join("<br>");
   });
   $("#casefile-form").addEventListener("submit", async e=>{
     e.preventDefault();
     const dept = STATE.casefileDept;
     if (!dept || !canUploadCaseFile_(dept)) { toast("You can only upload case files to your own department"); return; }
 
-    const file = $("#casefile-file").files[0];
-    if (!file) { toast("Please choose a PDF file"); return; }
-    if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) { toast("Only PDF files are allowed"); return; }
-    if (file.size > 8 * 1024 * 1024) { toast("That file is too big \u2014 please upload a PDF under 8MB"); return; }
+    const files = Array.from($("#casefile-file").files);
+    if (!files.length) { toast("Please choose at least one PDF file"); return; }
+    if (files.length > 10) { toast("Please upload 10 PDFs or fewer at a time"); return; }
+    for (const file of files) {
+      if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) { toast(`${file.name} isn't a PDF`); return; }
+      if (file.size > 8 * 1024 * 1024) { toast(`${file.name} is over 8MB \u2014 please use a smaller PDF`); return; }
+    }
 
     const submitBtn = $("#casefile-submit");
     submitBtn.disabled = true;
+    const category = $("#casefile-category").value.trim();
+    const description = $("#casefile-desc").value.trim();
+    const uploadedBy = DATA.users[STATE.role].name;
+    let done = 0, lastWarning = "";
+
     try {
-      const payload = {
-        department: dept,
-        category: $("#casefile-category").value.trim(),
-        description: $("#casefile-desc").value.trim(),
-        uploadedBy: DATA.users[STATE.role].name,
-        fileName: file.name, mimeType: "application/pdf",
-      };
-      let record, warning = "";
-      if (apiConfigured()) {
-        payload.fileData = await fileToBase64_(file);
-        const res = await apiPost("addCaseFile", payload);
-        if (!res.ok) {
-          toast(res.error ? `Couldn't upload: ${res.error}` : "Couldn't upload \u2014 redeploy your Apps Script with the latest Code.gs");
-          return;
+      for (const file of files) {
+        submitBtn.textContent = files.length > 1 ? `Uploading ${done + 1} of ${files.length}\u2026` : "Uploading\u2026";
+        const payload = { department: dept, category, description, uploadedBy, fileName: file.name, mimeType: "application/pdf" };
+        let record;
+
+        if (apiConfigured()) {
+          payload.fileData = await fileToBase64_(file);
+          const res = await apiPost("addCaseFile", payload);
+          if (!res.ok) {
+            toast(`Couldn't upload ${file.name}: ${res.error || "redeploy your Apps Script with the latest Code.gs"}`);
+            break;
+          }
+          const f = res.caseFile || {};
+          if (res.warning) lastWarning = res.warning;
+          record = { id: f.ID, fileId: f.FileId, dept, category: f.Category || category, desc: f.Description || description,
+                     by: f.UploadedBy || uploadedBy, date: fmtDate_(f.Date || new Date()),
+                     url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
+          if (!record.url) { toast(`${file.name} uploaded, but the backend didn't return a file link`); break; }
+        } else {
+          // no backend configured \u2014 files only last for this browser session
+          record = { id: "CF-" + Date.now() + "-" + done, dept, category, desc: description, by: uploadedBy,
+                     date: fmtDate_(new Date()), url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
         }
-        const f = res.caseFile || {};
-        warning = res.warning || "";
-        record = { fileId: f.FileId, id: f.ID, dept, category: f.Category || payload.category, desc: f.Description || payload.description,
-                   by: f.UploadedBy || payload.uploadedBy, date: fmtDate_(f.Date || new Date()),
-                   url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
-        if (!record.url) { toast("Uploaded, but the backend didn't return a file link"); return; }
-      } else {
-        // no backend configured \u2014 file only lasts for this browser session
-        record = { id: "CF-" + Date.now(), dept, category: payload.category, desc: payload.description,
-                   by: payload.uploadedBy, date: fmtDate_(new Date()),
-                   url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
+        DATA.caseFiles.unshift(record);
+        done++;
       }
-      DATA.caseFiles.unshift(record);
-      toast(warning ? `${record.category} saved \u2014 ${warning}` : `${record.category} published`);
+    } catch (err) {
+      toast(`Upload stopped: ${err.message || err}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Upload";
+    }
+
+    if (done) {
+      toast(lastWarning ? `${done} file${done > 1 ? "s" : ""} saved \u2014 ${lastWarning}` : `${category}: ${done} PDF${done > 1 ? "s" : ""} published`);
+      renderDeptCaseFiles(STATE.currentView);
+    }
+    if (done === files.length) {
       closeModals();
       $("#casefile-form").reset();
       $("#casefile-file-name").textContent = "";
-      renderDeptCaseFiles(STATE.currentView);
-    } finally {
-      submitBtn.disabled = false;
     }
   });
 

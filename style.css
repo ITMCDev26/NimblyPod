@@ -681,3 +681,7 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 .secure-pdf-msg{ height:100%; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:var(--ink-soft); font-size:14px; }
 .secure-pdf-msg.error{ color:#b3261e; }
 @media print{ #modal-overlay{ display:none !important; } }
+
+/* ---- multiple PDFs per case study ---- */
+.casefile-files{ display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+.casefile-files .btn{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }

@@ -698,9 +698,9 @@
       <label class="field"><span>Description</span>
         <textarea id="casefile-desc" rows="4" placeholder="What is this case file about?" required></textarea>
       </label>
-      <label class="field"><span>PDF file</span>
-        <input type="file" id="casefile-file" accept=".pdf,application/pdf" required />
-        <span id="casefile-file-name" style="font-size:12px;color:#7c8b86;display:block;margin-top:4px;"></span>
+      <label class="field"><span>PDF files <small style="font-weight:400;color:#7c8b86;">(you can select several)</small></span>
+        <input type="file" id="casefile-file" accept=".pdf,application/pdf" multiple required />
+        <span id="casefile-file-name" style="font-size:12px;color:#7c8b86;display:block;margin-top:4px;line-height:1.5;"></span>
       </label>
       <p class="panel-note">Once uploaded, anyone who visits this department's tab can view the file.</p>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>Cancel</button><button type="submit" class="btn btn-primary" id="casefile-submit">Upload</button></div>
