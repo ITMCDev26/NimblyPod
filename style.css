@@ -670,3 +670,14 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 .handbook-frame iframe{ width:100%; height:100%; border:0; display:block; }
 /* sits over the viewer's pop-out icon so the doc can't be opened in Google Docs from here */
 .handbook-shield{ position:absolute; top:0; right:0; width:64px; height:56px; z-index:2; background:transparent; }
+
+/* ---- secure (view-only) PDF viewer ---- */
+#case-pdf-host, .handbook-frame{ position:relative; }
+#case-pdf-host{ height:68vh; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#eef1f0; }
+.handbook-frame{ background:#eef1f0; }
+.secure-pdf{ height:100%; overflow:auto; padding:12px; display:flex; flex-direction:column; align-items:center; gap:12px;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+.secure-pdf canvas{ display:block; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18); max-width:none; pointer-events:none; }
+.secure-pdf-msg{ height:100%; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:var(--ink-soft); font-size:14px; }
+.secure-pdf-msg.error{ color:#b3261e; }
+@media print{ #modal-overlay{ display:none !important; } }

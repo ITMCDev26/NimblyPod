@@ -178,7 +178,7 @@ async function loadBackendData(){
   if (Array.isArray(res.caseFiles)) {
     DATA.caseFiles = res.caseFiles.map(f => ({
       id: f.ID, dept: f.Department, category: f.Category, desc: f.Description,
-      by: f.UploadedBy, date: fmtDate_(f.Date),
+      by: f.UploadedBy, date: fmtDate_(f.Date), fileId: f.FileId,
       url: f.FileUrl, name: f.FileName, mime: f.MimeType || "application/pdf",
     })).reverse();
   }
@@ -872,7 +872,7 @@ function renderDeptCaseFiles(viewId){
   });
   $all("[data-casefile-view]", panel).forEach(btn => btn.addEventListener("click", () => {
     const f = DATA.caseFiles.find(x => String(x.id) === btn.dataset.casefileView);
-    if (f) openCaseAttachment(f.url, `${f.category} \u2014 ${f.name || "Case file"}`, f.mime);
+    if (f) openCaseFileViewer_(f);
   }));
 }
 
@@ -1769,12 +1769,129 @@ function drawDonutChart(id, labels, values, colors){
 /* ---------------------------------------------------------------
    23. MODALS
    --------------------------------------------------------------- */
+/* ---------------------------------------------------------------
+   SECURE PDF VIEWER (view only, no download)
+   The Apps Script backend (getFile) hands the PDF to the page as data and
+   pdf.js draws it onto <canvas> pages. There is no toolbar, no download or
+   print button, and right-click / save / print shortcuts are blocked.
+   NOTE: a browser can never be made 100% copy-proof (screenshots, dev tools),
+   but this removes every normal way to download the file.
+   --------------------------------------------------------------- */
+const PDFJS_VER_ = "3.11.174";
+let pdfjsPromise_ = null;
+let secureViewToken_ = 0;
+
+function loadPdfJs_(){
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (!pdfjsPromise_) pdfjsPromise_ = new Promise((resolve, reject)=>{
+    const sc = document.createElement("script");
+    sc.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER_}/pdf.min.js`;
+    sc.onload = ()=>{
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER_}/pdf.worker.min.js`;
+      resolve(window.pdfjsLib);
+    };
+    sc.onerror = ()=>{ pdfjsPromise_ = null; reject(new Error("Couldn't load the PDF viewer \u2014 check your internet connection")); };
+    document.head.appendChild(sc);
+  });
+  return pdfjsPromise_;
+}
+
+function b64ToBytes_(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function fileIdFromUrl_(url){
+  const m = String(url || "").match(/\/d\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : "";
+}
+
+// Fetches a file from the backend as bytes (works even when Drive link sharing is blocked).
+async function fetchDriveBytes_(fileId){
+  const res = await apiGet("getFile", { id: fileId });
+  if (!res || !res.ok) throw new Error((res && res.error) || "The backend couldn't load this file \u2014 redeploy your Apps Script with the latest Code.gs");
+  return b64ToBytes_(res.data);
+}
+
+async function loadCaseFileBytes_(f){
+  if (/^blob:/.test(f.url || "")) {          // demo mode (no backend): file lives in this browser tab
+    const r = await fetch(f.url);
+    return new Uint8Array(await r.arrayBuffer());
+  }
+  const id = f.fileId || fileIdFromUrl_(f.url);
+  if (!id) throw new Error("This case file has no Drive file id");
+  return fetchDriveBytes_(id);
+}
+
+async function renderSecurePdf_(host, loadBytes){
+  const token = ++secureViewToken_;
+  host.innerHTML = `<div class="secure-pdf-msg">Loading document\u2026</div>`;
+  try {
+    const [pdfjs, bytes] = await Promise.all([loadPdfJs_(), loadBytes()]);
+    if (token !== secureViewToken_) return;                 // popup was closed meanwhile
+    const pdf = await pdfjs.getDocument({ data: bytes }).promise;
+    if (token !== secureViewToken_) return;
+
+    host.innerHTML = "";
+    const wrap = document.createElement("div");
+    wrap.className = "secure-pdf";
+    host.appendChild(wrap);
+    ["contextmenu","dragstart","copy","cut"].forEach(ev => wrap.addEventListener(ev, e => e.preventDefault()));
+
+    const cssWidth = Math.max(280, wrap.clientWidth - 24);
+    const dpr = window.devicePixelRatio || 1;
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      if (token !== secureViewToken_) return;
+      const base = page.getViewport({ scale: 1 });
+      const scale = cssWidth / base.width;
+      const vp = page.getViewport({ scale: scale * dpr });
+      const canvas = document.createElement("canvas");
+      canvas.width = vp.width; canvas.height = vp.height;
+      canvas.style.width = cssWidth + "px";
+      canvas.style.height = (vp.height / dpr) + "px";
+      wrap.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+    }
+  } catch (err) {
+    if (token !== secureViewToken_) return;
+    host.innerHTML = `<div class="secure-pdf-msg error">Couldn't open this document.<br><small>${escapeHtml_(err.message || err)}</small></div>`;
+  }
+}
+
+// Block save / print shortcuts while a secure viewer is open.
+document.addEventListener("keydown", e => {
+  const open = $("#modal-handbook.open") || $("#modal-case-attachment.open");
+  if (open && (e.ctrlKey || e.metaKey) && ["s","p","u"].includes(e.key.toLowerCase())) e.preventDefault();
+});
+
+function openCaseFileViewer_(f){
+  openModal("modal-case-attachment");                       // open first: openModal clears the popup body
+  $("#case-attachment-title").textContent = `${f.category} \u2014 ${f.name || "Case file"}`;
+  const body = $("#case-attachment-body");
+  body.innerHTML = `<div id="case-pdf-host"></div><p class="panel-note" style="margin-top:10px;">View only \u2014 this file can't be downloaded.</p>`;
+  renderSecurePdf_($("#case-pdf-host"), () => loadCaseFileBytes_(f));
+}
+
+function openHandbookViewer_(){
+  openModal("modal-handbook");
+  const host = $("#handbook-frame");
+  if (!apiConfigured()) {                                    // demo mode fallback
+    host.innerHTML = `<iframe src="https://docs.google.com/document/d/${DATA.handbookDocId}/preview" title="Company Handbook" referrerpolicy="no-referrer"></iframe>`;
+    return;
+  }
+  renderSecurePdf_(host, () => fetchDriveBytes_(DATA.handbookDocId));
+}
+
 function openModal(id){
   closeModals();
   $("#modal-overlay").classList.remove("hidden");
   $("#"+id).classList.add("open");
 }
 function closeModals(){
+  secureViewToken_++;
   $("#modal-overlay").classList.add("hidden");
   $all(".modal").forEach(m=>m.classList.remove("open"));
   const attBody = $("#case-attachment-body");
@@ -1792,17 +1909,17 @@ function closeModals(){
 // inline preview can't load (e.g. an org's Drive sharing policy, or a
 // file type the browser can't preview inline).
 function openCaseAttachment(url, name, mime){
+  openModal("modal-case-attachment");   // open first: openModal() clears the popup body
   $("#case-attachment-title").textContent = name || "Attachment";
   const body = $("#case-attachment-body");
 
-  if (!url){ body.innerHTML = "<p>No attachment on file.</p>"; openModal("modal-case-attachment"); return; }
+  if (!url){ body.innerHTML = "<p>No attachment on file.</p>"; return; }
 
   body.innerHTML = `
     ${attachmentPreviewHtml_(url, name, mime, "65vh")}
     <div style="margin-top:12px;display:flex;justify-content:flex-end;">
       <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(url))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
     </div>`;
-  openModal("modal-case-attachment");
 }
 
 function initModals(){
@@ -1947,16 +2064,17 @@ function initModals(){
         uploadedBy: DATA.users[STATE.role].name,
         fileName: file.name, mimeType: "application/pdf",
       };
-      let record;
+      let record, warning = "";
       if (apiConfigured()) {
         payload.fileData = await fileToBase64_(file);
         const res = await apiPost("addCaseFile", payload);
         if (!res.ok) {
-          toast(res.error ? `Couldn't upload: ${res.error}` : "Couldn't upload \u2014 update your Apps Script with the addCaseFile action (see CODE_GS_ADDITIONS.gs)");
+          toast(res.error ? `Couldn't upload: ${res.error}` : "Couldn't upload \u2014 redeploy your Apps Script with the latest Code.gs");
           return;
         }
         const f = res.caseFile || {};
-        record = { id: f.ID, dept, category: f.Category || payload.category, desc: f.Description || payload.description,
+        warning = res.warning || "";
+        record = { fileId: f.FileId, id: f.ID, dept, category: f.Category || payload.category, desc: f.Description || payload.description,
                    by: f.UploadedBy || payload.uploadedBy, date: fmtDate_(f.Date || new Date()),
                    url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
         if (!record.url) { toast("Uploaded, but the backend didn't return a file link"); return; }
@@ -1967,7 +2085,7 @@ function initModals(){
                    url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
       }
       DATA.caseFiles.unshift(record);
-      toast(`${record.category} published`);
+      toast(warning ? `${record.category} saved \u2014 ${warning}` : `${record.category} published`);
       closeModals();
       $("#casefile-form").reset();
       $("#casefile-file-name").textContent = "";
@@ -1978,12 +2096,7 @@ function initModals(){
   });
 
   /* ---- Company Handbook (Organization tab) ---- */
-  $("#handbook-btn").addEventListener("click", ()=>{
-    // /preview is Google's embeddable read-only viewer: no editing, no toolbar.
-    const src = `https://docs.google.com/document/d/${DATA.handbookDocId}/preview`;
-    $("#handbook-frame").innerHTML = `<iframe src="${src}" title="Company Handbook" referrerpolicy="no-referrer"></iframe><div class="handbook-shield"></div>`;
-    openModal("modal-handbook");
-  });
+  $("#handbook-btn").addEventListener("click", openHandbookViewer_);
 
   setupAnnouncementForm_();
   $("#ann-new-btn").addEventListener("click", ()=> openModal("modal-ann-new"));
