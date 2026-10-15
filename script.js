@@ -48,6 +48,18 @@ function initialsFrom_(name){
   return (name || "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
 }
 
+// "October 15, 2026 | 8:15 AM". Falls back to date only when the stored
+// value has no time of day (exactly midnight, e.g. older date-only rows).
+function fmtUploadStamp_(v){
+  if(!v) return "";
+  const d = new Date(v);
+  if(isNaN(d)) return String(v);
+  const date = d.toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  if(d.getHours()===0 && d.getMinutes()===0 && d.getSeconds()===0) return date;
+  const time = d.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+  return `${date} | ${time}`;
+}
+
 function fmtDate_(v){
   if (!v) return "";
   const d = new Date(v);
@@ -178,7 +190,7 @@ async function loadBackendData(){
   if (Array.isArray(res.caseFiles)) {
     DATA.caseFiles = res.caseFiles.map(f => ({
       id: f.ID, dept: f.Department, category: f.Category, desc: f.Description,
-      by: f.UploadedBy, date: fmtDate_(f.Date), fileId: f.FileId,
+      by: f.UploadedBy, date: fmtDate_(f.Date), dateRaw: f.Date, fileId: f.FileId,
       url: f.FileUrl, name: f.FileName, mime: f.MimeType || "application/pdf",
     })).reverse();
   }
@@ -855,7 +867,7 @@ function renderDeptCaseFiles(viewId){
     let g = byKey[key];
     if (!g) { g = byKey[key] = { category: f.category, files: [] }; groups.push(g); }
     g.files.unshift(f);                       // oldest file first inside a card
-    g.desc = f.desc; g.by = f.by; g.date = f.date;   // ends up as the first upload's details
+    g.desc = f.desc; g.by = f.by; g.date = f.date; g.dateRaw = f.dateRaw;   // ends up as the first upload's details
   });
   const canUpload = canUploadCaseFile_(dept);
 
@@ -868,7 +880,7 @@ function renderDeptCaseFiles(viewId){
       <div class="casefile-card">
         <h4>${escapeHtml_(g.category)}</h4>
         <p>${escapeHtml_(g.desc)}</p>
-        <span class="casefile-meta">Uploaded by ${escapeHtml_(g.by)}${g.date ? " &middot; " + escapeHtml_(g.date) : ""}</span>
+        <span class="casefile-meta">Uploaded by ${escapeHtml_(g.by)}${(g.dateRaw || g.date) ? "<br>" + escapeHtml_(fmtUploadStamp_(g.dateRaw || g.date)) : ""}</span>
         <div class="casefile-files">${g.files.map(f => `
           <button type="button" class="btn btn-ghost btn-sm" data-casefile-view="${escapeHtml_(f.id)}" title="${escapeHtml_(f.name)}">&#128196; ${escapeHtml_(g.files.length === 1 ? "View " + g.category : "View " + String(f.name || "PDF").replace(/\.pdf$/i, ""))}</button>`).join("")}
         </div>
@@ -2091,13 +2103,13 @@ function initModals(){
           const f = res.caseFile || {};
           if (res.warning) lastWarning = res.warning;
           record = { id: f.ID, fileId: f.FileId, dept, category: f.Category || category, desc: f.Description || description,
-                     by: f.UploadedBy || uploadedBy, date: fmtDate_(f.Date || new Date()),
+                     by: f.UploadedBy || uploadedBy, date: fmtDate_(f.Date || new Date()), dateRaw: f.Date || new Date().toISOString(),
                      url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
           if (!record.url) { toast(`${file.name} uploaded, but the backend didn't return a file link`); break; }
         } else {
           // no backend configured \u2014 files only last for this browser session
           record = { id: "CF-" + Date.now() + "-" + done, dept, category, desc: description, by: uploadedBy,
-                     date: fmtDate_(new Date()), url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
+                     date: fmtDate_(new Date()), dateRaw: new Date().toISOString(), url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
         }
         DATA.caseFiles.unshift(record);
         done++;
