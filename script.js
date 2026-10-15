@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbwEQkeEKa41Mke555dRki_hL0sp4kXyNSwoTeyf73FW0m744uV6GwE01wV2jcMPI7Sc/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbzluFtkImLO2gNL7rvU6ik8UodQHvM1XP8-3WqDbB8e4FcxquUK8AcgC0rTSY0SQBJs/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -1291,8 +1291,8 @@ function renderCases(){
         <div class="kan-card" data-case="${c.number}">
           <strong>${c.number}</strong>
           <p style="font-size:12.5px;color:#6b7280;margin:4px 0 0;line-height:1.4;">${(c.description||"").slice(0,70)}${(c.description||"").length>70?"…":""}</p>
+          ${c.attachmentUrl && c.attachmentUploadedAt ? `<div style="font-size:12px;color:var(--ink-soft);margin:6px 0 0;">📎 ${fmtUploadStamp_(c.attachmentUploadedAt)}</div>` : ""}
           <div class="kan-meta">${c.employee} &middot; ${c.category || "Uncategorized"}${c.attachmentUrl ? " &middot; 📎" : ""}</div>
-          ${c.attachmentUrl && c.attachmentUploadedAt ? `<div class="kan-meta" style="margin-top:2px;">📎 Uploaded ${fmtUploadStamp_(c.attachmentUploadedAt)}</div>` : ""}
           <span class="badge ${statusBadgeClass(c.status)}">${c.assigned}</span>
         </div>`).join("")}
     </div>`;
@@ -1315,7 +1315,8 @@ function openCase(number){
       <div style="grid-column:1/-1;"><dt>Status</dt><dd><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></dd></div>
     </div>
     <p style="line-height:1.6;font-size:13.8px;">${c.description}</p>
-    ${c.attachmentUrl ? `<button type="button" class="btn btn-ghost btn-sm" id="view-case-attachment" style="margin-bottom:14px;">📎 View attachment${c.attachmentName ? " — " + c.attachmentName : ""}</button>${c.attachmentUploadedAt ? `<div style="font-size:12px;color:var(--ink-soft);margin:-8px 0 14px;">Uploaded ${fmtUploadStamp_(c.attachmentUploadedAt)}</div>` : ""}` : ""}
+    ${c.attachmentUrl && c.attachmentUploadedAt ? `<p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 12px;">📎 File uploaded: ${fmtUploadStamp_(c.attachmentUploadedAt)}</p>` : ""}
+    ${c.attachmentUrl ? `<button type="button" class="btn btn-ghost btn-sm" id="view-case-attachment" style="margin-bottom:14px;">📎 View attachment${c.attachmentName ? " — " + c.attachmentName : ""}</button>` : ""}
     <ul class="case-history">${c.history.map(h=>`<li><span class="dot-ic"></span><div class="act-text"><strong>${h.text}</strong><span class="act-time">${h.time}</span></div></li>`).join("")}</ul>
     <div class="case-actions-row">
       ${["Consultation","Interview","Mediation","Policy Review"].map(a=>`<button class="btn btn-ghost btn-sm" data-caseaction="${a}">${a}</button>`).join("")}
