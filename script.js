@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Paste your deployed Apps Script Web App URL here (ends in /exec).
   // See SETUP_INSTRUCTIONS.md. Leave blank to run on the built-in demo data.
-  apiUrl: "https://script.google.com/macros/s/AKfycbwEQkeEKa41Mke555dRki_hL0sp4kXyNSwoTeyf73FW0m744uV6GwE01wV2jcMPI7Sc/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyMSlxx7wcvo77XIbzO_F14Ciw5Rp75dmyM9fyV4IdIGpYQ3FSvj-naINh0B9uv9dTB/exec",
 };
 
 /* ---------------------------------------------------------------
@@ -48,16 +48,6 @@ function initialsFrom_(name){
   return (name || "").split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
 }
 
-// "October 15, 2026 | 8:15 AM" — used for when a case file was uploaded.
-function fmtUploadStamp_(v){
-  if(!v) return "";
-  const d = new Date(v);
-  if(isNaN(d)) return String(v);
-  const date = d.toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
-  const time = d.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
-  return `${date} | ${time}`;
-}
-
 function fmtDate_(v){
   if (!v) return "";
   const d = new Date(v);
@@ -67,6 +57,37 @@ function fmtDate_(v){
 
 function safeJSON_(str, fallback){
   try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+function escapeHtml_(v){
+  return String(v == null ? "" : v).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch]);
+}
+
+// Builds the HTML that displays an uploaded case document (image, PDF, Drive
+// file...). Shared by the case review modal and the standalone popup.
+function attachmentPreviewHtml_(url, name, mime, heightCss){
+  const safeUrl = escapeHtml_(url);
+  const safeName = escapeHtml_(name || "Attachment");
+  const isDriveLink = url.includes("drive.google.com");
+  const isImage = (mime || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|heic)$/i.test(name || "");
+  const isPdf = (mime || "") === "application/pdf" || /\.pdf$/i.test(name || "");
+
+  if (isDriveLink) {
+    // Drive's own preview endpoint renders images, PDFs, and Office docs alike.
+    return `<iframe src="${safeUrl}" style="width:100%;height:${heightCss};border:0;border-radius:8px;" allow="autoplay"></iframe>`;
+  }
+  if (isImage) {
+    return `<img src="${safeUrl}" alt="${safeName}" style="max-width:100%;max-height:${heightCss};display:block;margin:0 auto;border-radius:8px;" />`;
+  }
+  if (isPdf) {
+    return `<iframe src="${safeUrl}" style="width:100%;height:${heightCss};border:0;border-radius:8px;"></iframe>`;
+  }
+  return `<div class="empty-note" style="padding:34px 16px;">This file type can't be previewed here. Use "Open in new tab" to view it.</div>`;
+}
+
+// The /preview link is for embedding; the normal viewer page is /view.
+function attachmentOpenUrl_(url){
+  return url.includes("drive.google.com") ? url.replace(/\/preview$/, "/view") : url;
 }
 
 // Reads a File into a plain base64 string (no "data:...;base64," prefix)
@@ -118,8 +139,17 @@ async function loadBackendData(){
 
   DATA.announcements = (res.announcements || []).map(a => ({
     id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
-    author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
+    author: a.Author, date: fmtDate_(a.Date),
+    attachmentUrl: "", attachmentName: "", attachmentMime: "",
   })).reverse();
+
+  // Announcements carry their attachment via a separate AnnouncementAttachments
+  // tab (see Code.gs) so match it back onto each announcement by its ID.
+  (res.announcementAttachments || []).forEach(att => {
+    const key = String(att.AnnouncementID || "").trim();
+    const a = DATA.announcements.find(x => String(x.id || "").trim() === key);
+    if (a && att.FileUrl) { a.attachmentUrl = att.FileUrl; a.attachmentName = att.FileName; a.attachmentMime = att.MimeType || ""; }
+  });
 
   DATA.appointments = (res.appointments || []).map(a => ({
     id: a.ID, employee: a.Employee, employeeEmail: a.EmployeeEmail,
@@ -132,15 +162,26 @@ async function loadBackendData(){
     number: c.Number, employee: c.Employee, status: c.Status,
     category: c.Category, assigned: c.Assigned, description: c.Description,
     history: safeJSON_(c.HistoryJSON, []),
-    attachmentUrl: "", attachmentName: "", attachmentMime: "", attachmentUploadedAt: "",
+    attachmentUrl: "", attachmentName: "", attachmentMime: "",
   }));
 
   // Cases carry their attachment via a separate CaseAttachments tab (see
   // Code.gs) so match it back onto each case by case number.
   (res.caseAttachments || []).forEach(att => {
-    const c = DATA.cases.find(x => x.number === att.CaseNumber);
-    if (c) { c.attachmentUrl = att.FileUrl; c.attachmentName = att.FileName; c.attachmentMime = att.MimeType || ""; c.attachmentUploadedAt = att.UploadedAt || ""; }
+    const key = String(att.CaseNumber || "").trim();
+    const c = DATA.cases.find(x => String(x.number || "").trim() === key);
+    if (c && att.FileUrl) { c.attachmentUrl = att.FileUrl; c.attachmentName = att.FileName; c.attachmentMime = att.MimeType || ""; }
   });
+
+  // Department case files (public, viewable by anyone who opens that department's tab).
+  // Only overwrite local data when the backend actually returns the list.
+  if (Array.isArray(res.caseFiles)) {
+    DATA.caseFiles = res.caseFiles.map(f => ({
+      id: f.ID, dept: f.Department, category: f.Category, desc: f.Description,
+      by: f.UploadedBy, date: fmtDate_(f.Date), fileId: f.FileId,
+      url: f.FileUrl, name: f.FileName, mime: f.MimeType || "application/pdf",
+    })).reverse();
+  }
 
   DATA.requests = res.requests || [];
 
@@ -162,6 +203,8 @@ async function loadBackendData(){
    1. DUMMY DATA
    --------------------------------------------------------------- */
 const DATA = {
+  caseFiles: [],
+  handbookDocId: "1chXyVz-u8SzVR4KiA4OiOIT2xuAFabk_FEMH2B9-_vw",
   perfKpis: [
     { label:"Avg. rating (Q3)", value:"4.2 / 5" },
     { label:"Goals on track", value:"87%" },
@@ -320,12 +363,12 @@ const DATA = {
   succession: [],
 
   announcements: [
-    { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026", priority:"High" },
-    { id:2, title:"Revised Leave-Filing Cut-off", category:"Policy", desc:"Starting October 1, leave requests must be filed at least 5 working days in advance except for emergency leave.", author:"Marisol Reyes", date:"Sep 08, 2026", priority:"High" },
-    { id:3, title:"Data Privacy Refresher — Register Now", category:"Training", desc:"Mandatory refresher for all employees handling customer data. Two sessions available this month.", author:"Kyle Fernandez", date:"Sep 05, 2026", priority:"Normal" },
-    { id:4, title:"HR Helpdesk Hours Extended", category:"HR", desc:"The HR helpdesk is now open until 8:00 PM on weekdays to better support night-shift teams.", author:"Bien Santos", date:"Sep 03, 2026", priority:"Normal" },
-    { id:5, title:"Foundation Day Celebration", category:"Events", desc:"Mark your calendars \u2014 our 12th Foundation Day celebration is happening this October with games, food, and awards.", author:"Rosario Viray", date:"Aug 29, 2026", priority:"Normal" },
-    { id:6, title:"Building B Fire Drill", category:"Emergency", desc:"A scheduled fire drill will take place in Building B on September 15 at 3:00 PM. Please follow floor marshal instructions.", author:"Admin Root", date:"Aug 27, 2026", priority:"High" },
+    { id:1, title:"Q4 Town Hall — Save the Date", category:"Company", desc:"Join the CEO and department heads for the Q4 town hall covering performance, priorities, and open forum Q&A.", author:"Rosario Viray", date:"Sep 09, 2026" },
+    { id:2, title:"Revised Leave-Filing Cut-off", category:"Policy", desc:"Starting October 1, leave requests must be filed at least 5 working days in advance except for emergency leave.", author:"Marisol Reyes", date:"Sep 08, 2026" },
+    { id:3, title:"Data Privacy Refresher — Register Now", category:"Training", desc:"Mandatory refresher for all employees handling customer data. Two sessions available this month.", author:"Kyle Fernandez", date:"Sep 05, 2026" },
+    { id:4, title:"HR Helpdesk Hours Extended", category:"HR", desc:"The HR helpdesk is now open until 8:00 PM on weekdays to better support night-shift teams.", author:"Bien Santos", date:"Sep 03, 2026" },
+    { id:5, title:"Foundation Day Celebration", category:"Events", desc:"Mark your calendars \u2014 our 12th Foundation Day celebration is happening this October with games, food, and awards.", author:"Rosario Viray", date:"Aug 29, 2026" },
+    { id:6, title:"Building B Fire Drill", category:"Emergency", desc:"A scheduled fire drill will take place in Building B on September 15 at 3:00 PM. Please follow floor marshal instructions.", author:"Admin Root", date:"Aug 27, 2026" },
   ],
 
   appointments: [
@@ -767,6 +810,81 @@ function renderView(viewId){
     backup: renderBackup, settings: renderSettings, help: ()=>{},
   };
   (map[viewId] || function(){})();
+  renderDeptCaseFiles(viewId);
+}
+
+/* ---------------------------------------------------------------
+   DEPARTMENT CASE FILES
+   Each department tab (and its matching main-nav view) shows the
+   public case files for that department. Members of the department
+   (and admins) also get an "Upload case file" button.
+   --------------------------------------------------------------- */
+const VIEW_TO_DEPT = {
+  recruitment: "Talent Acquisition & Workforce Planning",
+  learning:    "Learning, Training & Development",
+  performance: "Performance & Rewards",
+  wellbeing:   "Employee Relations & Well-being",
+  analytics:   "HR Operations, Analytics & Policy",
+};
+
+function normDept_(d){ return String(d || "").toLowerCase().replace(/\s+/g, " ").trim(); }
+
+function canUploadCaseFile_(dept){
+  if (STATE.role === "admin") return true;
+  const u = DATA.users[STATE.role] || {};
+  return normDept_(u.dept) === normDept_(dept);
+}
+
+function renderDeptCaseFiles(viewId){
+  const dept = VIEW_TO_DEPT[viewId];
+  const section = $(`#view-${viewId}`);
+  if (!dept || !section) return;
+
+  let panel = $(`#casefiles-${viewId}`);
+  if (!panel) {
+    panel = el("div", "panel dept-casefiles");
+    panel.id = `casefiles-${viewId}`;
+    section.appendChild(panel);
+  }
+
+  // One card per case study (category). Every PDF uploaded under that category
+  // gets its own "View" button. DATA.caseFiles is newest-first.
+  const groups = [], byKey = {};
+  DATA.caseFiles.filter(f => normDept_(f.dept) === normDept_(dept)).forEach(f => {
+    const key = String(f.category || "").trim().toLowerCase();
+    let g = byKey[key];
+    if (!g) { g = byKey[key] = { category: f.category, files: [] }; groups.push(g); }
+    g.files.unshift(f);                       // oldest file first inside a card
+    g.desc = f.desc; g.by = f.by; g.date = f.date;   // ends up as the first upload's details
+  });
+  const canUpload = canUploadCaseFile_(dept);
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div><h3>Case files</h3><p class="panel-sub">${escapeHtml_(dept)} &middot; open to everyone</p></div>
+      ${canUpload ? `<button type="button" class="btn btn-primary btn-sm" data-casefile-upload>+ Upload case file</button>` : ""}
+    </div>
+    ${groups.length ? `<div class="casefile-list">${groups.map(g => `
+      <div class="casefile-card">
+        <h4>${escapeHtml_(g.category)}</h4>
+        <p>${escapeHtml_(g.desc)}</p>
+        <span class="casefile-meta">Uploaded by ${escapeHtml_(g.by)}${g.date ? " &middot; " + escapeHtml_(g.date) : ""}</span>
+        <div class="casefile-files">${g.files.map(f => `
+          <button type="button" class="btn btn-ghost btn-sm" data-casefile-view="${escapeHtml_(f.id)}" title="${escapeHtml_(f.name)}">&#128196; ${escapeHtml_(g.files.length === 1 ? "View " + g.category : "View " + String(f.name || "PDF").replace(/\.pdf$/i, ""))}</button>`).join("")}
+        </div>
+      </div>`).join("")}</div>`
+    : `<p class="empty-note">No case files have been published for this department yet.</p>`}`;
+
+  const up = $("[data-casefile-upload]", panel);
+  if (up) up.addEventListener("click", () => {
+    STATE.casefileDept = dept;
+    $("#casefile-modal-title").textContent = `Upload case file \u2014 ${DATA.deptInfo[dept].short}`;
+    openModal("modal-casefile-new");
+  });
+  $all("[data-casefile-view]", panel).forEach(btn => btn.addEventListener("click", () => {
+    const f = DATA.caseFiles.find(x => String(x.id) === btn.dataset.casefileView);
+    if (f) openCaseFileViewer_(f);
+  }));
 }
 
 /* ---------------------------------------------------------------
@@ -1122,19 +1240,34 @@ function renderLearning(){
 /* ---------------------------------------------------------------
    14. RENDER: ANNOUNCEMENTS
    --------------------------------------------------------------- */
+// Category is free text typed by HR, so "HR" and "hr " count as the same one.
+function annCategory_(a){ return String((a && a.category) || "").trim() || "Uncategorized"; }
+
 function renderAnnouncements(){
-  const cats = ["All","Company","HR","Training","Policy","Events","Emergency"];
-  $("#ann-filters").innerHTML = cats.map(c=>`<button class="chip ${STATE.annFilter===c?'active':''}" data-cat="${c}">${c}</button>`).join("");
+  // Filter chips are built from whichever categories HR has actually used.
+  const seen = new Map(); // lower-case key -> label as first typed
+  DATA.announcements.forEach(a=>{
+    const label = annCategory_(a);
+    if (!seen.has(label.toLowerCase())) seen.set(label.toLowerCase(), label);
+  });
+  const cats = ["All", ...[...seen.values()].sort((x,y)=> x.localeCompare(y))];
+  if (STATE.annFilter !== "All" && !seen.has(String(STATE.annFilter).toLowerCase())) STATE.annFilter = "All";
+  const isActive = c => String(c).toLowerCase() === String(STATE.annFilter).toLowerCase();
+
+  $("#ann-filters").innerHTML = cats.map(c=>`<button class="chip ${isActive(c)?'active':''}" data-cat="${escapeHtml_(c)}">${escapeHtml_(c)}</button>`).join("");
   $all("[data-cat]").forEach(chip=> chip.addEventListener("click", ()=>{ STATE.annFilter = chip.dataset.cat; renderAnnouncements(); }));
 
-  const list = DATA.announcements.filter(a=> STATE.annFilter==="All" || a.category===STATE.annFilter);
-  $("#ann-grid").innerHTML = list.map(a=>`
-    <div class="ann-card" data-ann="${a.id}">
-      <div class="ann-top"><span class="badge badge-green">${a.category}</span>${a.priority==="High" ? '<span class="badge badge-red">High priority</span>' : ''}</div>
-      <h4>${a.title}</h4>
-      <p>${a.desc.slice(0,90)}${a.desc.length>90 ? '\u2026' : ''}</p>
-      <div class="ann-meta">${a.author} &middot; ${a.date}</div>
-    </div>`).join("") || `<p style="color:var(--ink-soft);">No announcements in this category yet.</p>`;
+  const list = DATA.announcements.filter(a=> STATE.annFilter==="All" || annCategory_(a).toLowerCase() === String(STATE.annFilter).toLowerCase());
+  $("#ann-grid").innerHTML = list.map(a=>{
+    const desc = String(a.desc || "");
+    return `
+    <div class="ann-card" data-ann="${escapeHtml_(a.id)}">
+      <div class="ann-top"><span class="badge badge-green">${escapeHtml_(annCategory_(a))}</span></div>
+      <h4>${escapeHtml_(a.title)}</h4>
+      <p>${escapeHtml_(desc.slice(0,90))}${desc.length>90 ? '\u2026' : ''}</p>
+      <div class="ann-meta">${escapeHtml_(a.author)} &middot; ${escapeHtml_(a.date)}${a.attachmentUrl ? " &middot; 📎" : ""}</div>
+    </div>`;
+  }).join("") || `<p style="color:var(--ink-soft);">No announcements in this category yet.</p>`;
 
   $all("[data-ann]").forEach(card=> card.addEventListener("click", ()=> openAnnouncement(Number(card.dataset.ann))));
 }
@@ -1142,12 +1275,81 @@ function renderAnnouncements(){
 function openAnnouncement(id){
   const a = DATA.announcements.find(x=>x.id===id);
   if(!a) return;
+  openModal("modal-announcement"); // opens first: closeModals() clears the body
+
+  // Same viewer as the case review: the file opens right inside the announcement.
+  const attachmentHtml = a.attachmentUrl ? `
+    <div class="case-attachment">
+      <div class="case-attachment-head">
+        <strong>📎 ${escapeHtml_(a.attachmentName || "Attachment")}</strong>
+        <span class="case-attachment-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="toggle-ann-attachment">Hide</button>
+          <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(a.attachmentUrl))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+        </span>
+      </div>
+      <div class="case-attachment-preview" id="ann-attachment-preview">${attachmentPreviewHtml_(a.attachmentUrl, a.attachmentName, a.attachmentMime, "50vh")}</div>
+    </div>` : "";
+
   $("#ann-modal-title").textContent = a.title;
   $("#ann-modal-body").innerHTML = `
-    <div class="ann-top" style="margin-bottom:12px;"><span class="badge badge-green">${a.category}</span>${a.priority==="High" ? '<span class="badge badge-red">High priority</span>' : ''}</div>
-    <p style="line-height:1.6;margin-bottom:14px;">${a.desc}</p>
-    <p style="font-size:12.5px;color:var(--ink-soft);">Posted by ${a.author} on ${a.date}</p>`;
-  openModal("modal-announcement");
+    <div class="ann-top" style="margin-bottom:12px;"><span class="badge badge-green">${escapeHtml_(annCategory_(a))}</span></div>
+    <p style="line-height:1.6;margin-bottom:14px;white-space:pre-line;">${escapeHtml_(a.desc)}</p>
+    ${attachmentHtml}
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:14px;">Posted by ${escapeHtml_(a.author)} on ${escapeHtml_(a.date)}</p>`;
+
+  const toggleBtn = $("#toggle-ann-attachment");
+  if (toggleBtn) toggleBtn.addEventListener("click", ()=>{
+    const pane = $("#ann-attachment-preview");
+    const hidden = pane.classList.toggle("hidden");
+    toggleBtn.textContent = hidden ? "Show" : "Hide";
+  });
+}
+
+// The "New announcement" form markup lives in index.html. This makes sure the
+// form has a free-text Category box (not a dropdown), no Priority field, and an
+// Attachment picker. If index.html already has them, it leaves everything alone.
+function setupAnnouncementForm_(){
+  const form = $("#ann-new-form");
+  if (!form) return;
+
+  // Category: dropdown -> a box HR can type into
+  const cat = $("#ann-category");
+  if (cat && cat.tagName === "SELECT") {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "ann-category";
+    input.required = true;
+    input.maxLength = 40;
+    input.autocomplete = "off";
+    input.placeholder = "Type a category, e.g. Company, HR, Training";
+    cat.replaceWith(input);
+  } else if (cat && !cat.placeholder) {
+    cat.placeholder = "Type a category, e.g. Company, HR, Training";
+  }
+
+  // Priority: removed
+  const pri = $("#ann-priority");
+  if (pri) {
+    const wrap = pri.closest("label");
+    if (wrap && !wrap.contains($("#ann-category"))) wrap.remove(); else pri.remove();
+  }
+
+  // Attachment: added (after the description box)
+  if (!$("#ann-attachment")) {
+    const field = document.createElement("label");
+    field.className = "field";
+    field.innerHTML = `<span>Attachment (optional)</span>
+      <input type="file" id="ann-attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+      <small id="ann-attachment-name" style="color:var(--ink-soft);"></small>`;
+    const descField = $("#ann-desc") ? $("#ann-desc").closest("label") : null;
+    if (descField) descField.insertAdjacentElement("afterend", field);
+    else form.insertBefore(field, form.lastElementChild);
+  }
+  $("#ann-attachment").addEventListener("change", ()=>{
+    const f = $("#ann-attachment").files[0];
+    const nameEl = $("#ann-attachment-name");
+    if (nameEl) nameEl.textContent = f ? f.name : "";
+  });
 }
 
 /* ---------------------------------------------------------------
@@ -1292,7 +1494,6 @@ function renderCases(){
           <strong>${c.number}</strong>
           <p style="font-size:12.5px;color:#6b7280;margin:4px 0 0;line-height:1.4;">${(c.description||"").slice(0,70)}${(c.description||"").length>70?"…":""}</p>
           <div class="kan-meta">${c.employee} &middot; ${c.category || "Uncategorized"}${c.attachmentUrl ? " &middot; 📎" : ""}</div>
-          ${c.attachmentUrl && c.attachmentUploadedAt ? `<div class="kan-meta" style="margin-top:2px;">📎 Uploaded ${fmtUploadStamp_(c.attachmentUploadedAt)}</div>` : ""}
           <span class="badge ${statusBadgeClass(c.status)}">${c.assigned}</span>
         </div>`).join("")}
     </div>`;
@@ -1307,6 +1508,20 @@ function openCase(number){
   $("#case-modal-title").textContent = `Case ${c.number}`;
   const nextIdx = CASE_STAGES.indexOf(c.status) + 1;
   const nextStage = CASE_STAGES[nextIdx];
+
+  // The uploaded document opens right inside the case review, so HR can read
+  // it while deciding what to do with the case.
+  const attachmentHtml = c.attachmentUrl ? `
+    <div class="case-attachment">
+      <div class="case-attachment-head">
+        <strong>📎 ${escapeHtml_(c.attachmentName || "Attachment")}</strong>
+        <span class="case-attachment-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="toggle-case-attachment">Hide</button>
+          <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(c.attachmentUrl))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+        </span>
+      </div>
+      <div class="case-attachment-preview" id="case-attachment-preview">${attachmentPreviewHtml_(c.attachmentUrl, c.attachmentName, c.attachmentMime, "50vh")}</div>
+    </div>` : `<p class="case-attachment-empty">No attachment on this case.</p>`;
   $("#case-modal-body").innerHTML = `
     <div class="case-detail-grid">
       <div><dt>Employee</dt><dd>${c.employee}</dd></div>
@@ -1315,15 +1530,19 @@ function openCase(number){
       <div style="grid-column:1/-1;"><dt>Status</dt><dd><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></dd></div>
     </div>
     <p style="line-height:1.6;font-size:13.8px;">${c.description}</p>
-    ${c.attachmentUrl ? `<button type="button" class="btn btn-ghost btn-sm" id="view-case-attachment" style="margin-bottom:14px;">📎 View attachment${c.attachmentName ? " — " + c.attachmentName : ""}</button>${c.attachmentUploadedAt ? `<div style="font-size:12px;color:var(--ink-soft);margin:-8px 0 14px;">Uploaded ${fmtUploadStamp_(c.attachmentUploadedAt)}</div>` : ""}` : ""}
+    ${attachmentHtml}
     <ul class="case-history">${c.history.map(h=>`<li><span class="dot-ic"></span><div class="act-text"><strong>${h.text}</strong><span class="act-time">${h.time}</span></div></li>`).join("")}</ul>
     <div class="case-actions-row">
       ${["Consultation","Interview","Mediation","Policy Review"].map(a=>`<button class="btn btn-ghost btn-sm" data-caseaction="${a}">${a}</button>`).join("")}
       ${nextStage ? `<button class="btn btn-primary btn-sm" data-advancecase="${nextStage}">Move to ${nextStage}</button>` : ""}
     </div>`;
 
-  const attBtn = $("#view-case-attachment");
-  if (attBtn) attBtn.addEventListener("click", ()=> openCaseAttachment(c.attachmentUrl, c.attachmentName, c.attachmentMime, c.attachmentUploadedAt));
+  const toggleBtn = $("#toggle-case-attachment");
+  if (toggleBtn) toggleBtn.addEventListener("click", ()=>{
+    const pane = $("#case-attachment-preview");
+    const hidden = pane.classList.toggle("hidden");
+    toggleBtn.textContent = hidden ? "Show" : "Hide";
+  });
 
   $all("[data-caseaction]").forEach(btn=> btn.addEventListener("click", ()=>{
     c.history.push({ text:`${btn.dataset.caseaction} logged`, time:"Just now" });
@@ -1561,16 +1780,137 @@ function drawDonutChart(id, labels, values, colors){
 /* ---------------------------------------------------------------
    23. MODALS
    --------------------------------------------------------------- */
+/* ---------------------------------------------------------------
+   SECURE PDF VIEWER (view only, no download)
+   The Apps Script backend (getFile) hands the PDF to the page as data and
+   pdf.js draws it onto <canvas> pages. There is no toolbar, no download or
+   print button, and right-click / save / print shortcuts are blocked.
+   NOTE: a browser can never be made 100% copy-proof (screenshots, dev tools),
+   but this removes every normal way to download the file.
+   --------------------------------------------------------------- */
+const PDFJS_VER_ = "3.11.174";
+let pdfjsPromise_ = null;
+let secureViewToken_ = 0;
+
+function loadPdfJs_(){
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (!pdfjsPromise_) pdfjsPromise_ = new Promise((resolve, reject)=>{
+    const sc = document.createElement("script");
+    sc.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER_}/pdf.min.js`;
+    sc.onload = ()=>{
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER_}/pdf.worker.min.js`;
+      resolve(window.pdfjsLib);
+    };
+    sc.onerror = ()=>{ pdfjsPromise_ = null; reject(new Error("Couldn't load the PDF viewer \u2014 check your internet connection")); };
+    document.head.appendChild(sc);
+  });
+  return pdfjsPromise_;
+}
+
+function b64ToBytes_(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function fileIdFromUrl_(url){
+  const m = String(url || "").match(/\/d\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : "";
+}
+
+// Fetches a file from the backend as bytes (works even when Drive link sharing is blocked).
+async function fetchDriveBytes_(fileId){
+  const res = await apiGet("getFile", { id: fileId });
+  if (!res || !res.ok) throw new Error((res && res.error) || "The backend couldn't load this file \u2014 redeploy your Apps Script with the latest Code.gs");
+  return b64ToBytes_(res.data);
+}
+
+async function loadCaseFileBytes_(f){
+  if (/^blob:/.test(f.url || "")) {          // demo mode (no backend): file lives in this browser tab
+    const r = await fetch(f.url);
+    return new Uint8Array(await r.arrayBuffer());
+  }
+  const id = f.fileId || fileIdFromUrl_(f.url);
+  if (!id) throw new Error("This case file has no Drive file id");
+  return fetchDriveBytes_(id);
+}
+
+async function renderSecurePdf_(host, loadBytes){
+  const token = ++secureViewToken_;
+  host.innerHTML = `<div class="secure-pdf-msg">Loading document\u2026</div>`;
+  try {
+    const [pdfjs, bytes] = await Promise.all([loadPdfJs_(), loadBytes()]);
+    if (token !== secureViewToken_) return;                 // popup was closed meanwhile
+    const pdf = await pdfjs.getDocument({ data: bytes }).promise;
+    if (token !== secureViewToken_) return;
+
+    host.innerHTML = "";
+    const wrap = document.createElement("div");
+    wrap.className = "secure-pdf";
+    host.appendChild(wrap);
+    ["contextmenu","dragstart","copy","cut"].forEach(ev => wrap.addEventListener(ev, e => e.preventDefault()));
+
+    const cssWidth = Math.max(280, wrap.clientWidth - 24);
+    const dpr = window.devicePixelRatio || 1;
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      if (token !== secureViewToken_) return;
+      const base = page.getViewport({ scale: 1 });
+      const scale = cssWidth / base.width;
+      const vp = page.getViewport({ scale: scale * dpr });
+      const canvas = document.createElement("canvas");
+      canvas.width = vp.width; canvas.height = vp.height;
+      canvas.style.width = cssWidth + "px";
+      canvas.style.height = (vp.height / dpr) + "px";
+      wrap.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+    }
+  } catch (err) {
+    if (token !== secureViewToken_) return;
+    host.innerHTML = `<div class="secure-pdf-msg error">Couldn't open this document.<br><small>${escapeHtml_(err.message || err)}</small></div>`;
+  }
+}
+
+// Block save / print shortcuts while a secure viewer is open.
+document.addEventListener("keydown", e => {
+  const open = $("#modal-handbook.open") || $("#modal-case-attachment.open");
+  if (open && (e.ctrlKey || e.metaKey) && ["s","p","u"].includes(e.key.toLowerCase())) e.preventDefault();
+});
+
+function openCaseFileViewer_(f){
+  openModal("modal-case-attachment");                       // open first: openModal clears the popup body
+  $("#case-attachment-title").textContent = `${f.category} \u2014 ${f.name || "Case file"}`;
+  const body = $("#case-attachment-body");
+  body.innerHTML = `<div id="case-pdf-host"></div><p class="panel-note" style="margin-top:10px;">View only \u2014 this file can't be downloaded.</p>`;
+  renderSecurePdf_($("#case-pdf-host"), () => loadCaseFileBytes_(f));
+}
+
+function openHandbookViewer_(){
+  openModal("modal-handbook");
+  const host = $("#handbook-frame");
+  if (!apiConfigured()) {                                    // demo mode fallback
+    host.innerHTML = `<iframe src="https://docs.google.com/document/d/${DATA.handbookDocId}/preview" title="Company Handbook" referrerpolicy="no-referrer"></iframe>`;
+    return;
+  }
+  renderSecurePdf_(host, () => fetchDriveBytes_(DATA.handbookDocId));
+}
+
 function openModal(id){
   closeModals();
   $("#modal-overlay").classList.remove("hidden");
   $("#"+id).classList.add("open");
 }
 function closeModals(){
+  secureViewToken_++;
   $("#modal-overlay").classList.add("hidden");
   $all(".modal").forEach(m=>m.classList.remove("open"));
   const attBody = $("#case-attachment-body");
   if (attBody) attBody.innerHTML = ""; // stop any preview from loading in the background
+  const annBody = $("#ann-modal-body");
+  if (annBody) annBody.innerHTML = "";
+  const hb = $("#handbook-frame");
+  if (hb) hb.innerHTML = "";
 }
 
 // Shows an uploaded case document in a popup, without leaving the page or
@@ -1579,37 +1919,18 @@ function closeModals(){
 // includes a plain "open" link so the file is reachable even if the
 // inline preview can't load (e.g. an org's Drive sharing policy, or a
 // file type the browser can't preview inline).
-function openCaseAttachment(url, name, mime, uploadedAt){
+function openCaseAttachment(url, name, mime){
+  openModal("modal-case-attachment");   // open first: openModal() clears the popup body
   $("#case-attachment-title").textContent = name || "Attachment";
   const body = $("#case-attachment-body");
 
-  if (!url){ body.innerHTML = "<p>No attachment on file.</p>"; openModal("modal-case-attachment"); return; }
-
-  const isDriveLink = url.includes("drive.google.com");
-  const isImage = (mime || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|heic)$/i.test(name || "");
-  const isPdf = (mime || "") === "application/pdf" || /\.pdf$/i.test(name || "");
-
-  let preview;
-  if (isDriveLink) {
-    // Drive's own preview endpoint renders images, PDFs, and Office docs alike.
-    preview = `<iframe src="${url}" style="width:100%;height:65vh;border:0;border-radius:8px;" allow="autoplay"></iframe>`;
-  } else if (isImage) {
-    preview = `<img src="${url}" alt="${name || "Attachment"}" style="max-width:100%;max-height:65vh;display:block;margin:0 auto;border-radius:8px;" />`;
-  } else if (isPdf) {
-    preview = `<iframe src="${url}" style="width:100%;height:65vh;border:0;border-radius:8px;"></iframe>`;
-  } else {
-    // No backend, non-image/PDF file — the browser can't preview this
-    // type inline, so lead with a clear way to open it instead.
-    preview = `<div class="empty-note" style="padding:34px 16px;">This file type can't be previewed here. Use "Open in new tab" below to view it.</div>`;
-  }
+  if (!url){ body.innerHTML = "<p>No attachment on file.</p>"; return; }
 
   body.innerHTML = `
-    ${preview}
-    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="font-size:12.5px;color:var(--ink-soft);">${uploadedAt ? "Uploaded " + fmtUploadStamp_(uploadedAt) : ""}</span>
-      <a class="btn btn-ghost btn-sm" href="${url}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
+    ${attachmentPreviewHtml_(url, name, mime, "65vh")}
+    <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+      <a class="btn btn-ghost btn-sm" href="${escapeHtml_(attachmentOpenUrl_(url))}" target="_blank" rel="noopener noreferrer">Open in new tab &#8599;</a>
     </div>`;
-  openModal("modal-case-attachment");
 }
 
 function initModals(){
@@ -1702,9 +2023,14 @@ function initModals(){
         history: safeJSON_(c.HistoryJSON, []),
         attachmentUrl: res.attachmentUrl || "", attachmentName: res.attachmentName || "",
         attachmentMime: payload.attachmentMime || "",
-        attachmentUploadedAt: res.attachmentUploadedAt || (file ? new Date().toISOString() : ""),
       });
-      toast(`Case ${c.Number} filed`);
+      if (file && res.attachmentError) {
+        toast(`Case ${c.Number} filed, but the attachment wasn't saved: ${res.attachmentError}`);
+      } else if (file && !res.attachmentUrl) {
+        toast(`Case ${c.Number} filed, but the backend didn't save the attachment. Redeploy your Apps Script (Deploy > Manage deployments > Edit > New version).`);
+      } else {
+        toast(`Case ${c.Number} filed`);
+      }
     } else {
       const number = "C-" + (1055 + DATA.cases.length + 1);
       DATA.cases.unshift({
@@ -1714,7 +2040,6 @@ function initModals(){
         // no backend configured — attachment only lasts for this browser session
         attachmentUrl: file ? URL.createObjectURL(file) : "", attachmentName: file ? file.name : "",
         attachmentMime: file ? (file.type || "application/octet-stream") : "",
-        attachmentUploadedAt: file ? new Date().toISOString() : "",
       });
       toast(`Case ${number} filed`);
     }
@@ -1725,31 +2050,144 @@ function initModals(){
     if(STATE.currentView === "cases") renderCases();
   });
 
+  /* ---- Department case files: upload ---- */
+  $("#casefile-file").addEventListener("change", ()=>{
+    const list = Array.from($("#casefile-file").files);
+    $("#casefile-file-name").innerHTML = list.map(f => "&#128196; " + escapeHtml_(f.name)).join("<br>");
+  });
+  $("#casefile-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const dept = STATE.casefileDept;
+    if (!dept || !canUploadCaseFile_(dept)) { toast("You can only upload case files to your own department"); return; }
+
+    const files = Array.from($("#casefile-file").files);
+    if (!files.length) { toast("Please choose at least one PDF file"); return; }
+    if (files.length > 10) { toast("Please upload 10 PDFs or fewer at a time"); return; }
+    for (const file of files) {
+      if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) { toast(`${file.name} isn't a PDF`); return; }
+      if (file.size > 8 * 1024 * 1024) { toast(`${file.name} is over 8MB \u2014 please use a smaller PDF`); return; }
+    }
+
+    const submitBtn = $("#casefile-submit");
+    submitBtn.disabled = true;
+    const category = $("#casefile-category").value.trim();
+    const description = $("#casefile-desc").value.trim();
+    const uploadedBy = DATA.users[STATE.role].name;
+    let done = 0, lastWarning = "";
+
+    try {
+      for (const file of files) {
+        submitBtn.textContent = files.length > 1 ? `Uploading ${done + 1} of ${files.length}\u2026` : "Uploading\u2026";
+        const payload = { department: dept, category, description, uploadedBy, fileName: file.name, mimeType: "application/pdf" };
+        let record;
+
+        if (apiConfigured()) {
+          payload.fileData = await fileToBase64_(file);
+          const res = await apiPost("addCaseFile", payload);
+          if (!res.ok) {
+            toast(`Couldn't upload ${file.name}: ${res.error || "redeploy your Apps Script with the latest Code.gs"}`);
+            break;
+          }
+          const f = res.caseFile || {};
+          if (res.warning) lastWarning = res.warning;
+          record = { id: f.ID, fileId: f.FileId, dept, category: f.Category || category, desc: f.Description || description,
+                     by: f.UploadedBy || uploadedBy, date: fmtDate_(f.Date || new Date()),
+                     url: f.FileUrl || res.fileUrl, name: f.FileName || file.name, mime: "application/pdf" };
+          if (!record.url) { toast(`${file.name} uploaded, but the backend didn't return a file link`); break; }
+        } else {
+          // no backend configured \u2014 files only last for this browser session
+          record = { id: "CF-" + Date.now() + "-" + done, dept, category, desc: description, by: uploadedBy,
+                     date: fmtDate_(new Date()), url: URL.createObjectURL(file), name: file.name, mime: "application/pdf" };
+        }
+        DATA.caseFiles.unshift(record);
+        done++;
+      }
+    } catch (err) {
+      toast(`Upload stopped: ${err.message || err}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Upload";
+    }
+
+    if (done) {
+      toast(lastWarning ? `${done} file${done > 1 ? "s" : ""} saved \u2014 ${lastWarning}` : `${category}: ${done} PDF${done > 1 ? "s" : ""} published`);
+      renderDeptCaseFiles(STATE.currentView);
+    }
+    if (done === files.length) {
+      closeModals();
+      $("#casefile-form").reset();
+      $("#casefile-file-name").textContent = "";
+    }
+  });
+
+  /* ---- Company Handbook (Organization tab) ---- */
+  $("#handbook-btn").addEventListener("click", openHandbookViewer_);
+
+  setupAnnouncementForm_();
   $("#ann-new-btn").addEventListener("click", ()=> openModal("modal-ann-new"));
   $("#ann-new-form").addEventListener("submit", async e=>{
     e.preventDefault();
-    const payload = {
-      title: $("#ann-title").value, category: $("#ann-category").value,
-      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name,
-      priority: $("#ann-priority").value === "High" ? "High" : "Normal",
-    };
 
-    if (apiConfigured()) {
-      const res = await apiPost("addAnnouncement", payload);
-      if (!res.ok) { toast(res.error || "Couldn't post announcement"); return; }
-      const a = res.announcement;
-      DATA.announcements.unshift({
-        id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
-        author: a.Author, date: fmtDate_(a.Date), priority: a.Priority || "Normal",
-      });
-    } else {
-      const id = Math.max(0, ...DATA.announcements.map(a=>a.id)) + 1;
-      DATA.announcements.unshift({ id, date:"Just now", ...payload });
+    const category = $("#ann-category").value.trim();
+    if (!category) { toast("Please type a category for this announcement"); return; }
+
+    const file = $("#ann-attachment").files[0];
+    const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8MB — keep sheet/Apps Script requests small
+    if (file && file.size > MAX_ATTACHMENT_BYTES) {
+      toast("That file is too big — please attach something under 8MB");
+      return;
     }
 
-    toast("Announcement posted");
+    const payload = {
+      title: $("#ann-title").value, category,
+      desc: $("#ann-desc").value, author: DATA.users[STATE.role].name,
+    };
+    const attachmentMime = file ? (file.type || "application/octet-stream") : "";
+    if (file) {
+      payload.attachmentName = file.name;
+      payload.attachmentMime = attachmentMime;
+      payload.attachmentData = await fileToBase64_(file);
+    }
+
+    // Uploading can take a few seconds — stop a double click from posting twice.
+    const submitBtn = e.submitter || $("#ann-new-form").querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      if (apiConfigured()) {
+        const res = await apiPost("addAnnouncement", payload);
+        if (!res.ok) { toast(res.error || "Couldn't post announcement"); return; }
+        const a = res.announcement;
+        DATA.announcements.unshift({
+          id: a.ID, title: a.Title, category: a.Category, desc: a.Description,
+          author: a.Author, date: fmtDate_(a.Date),
+          attachmentUrl: res.attachmentUrl || "", attachmentName: res.attachmentName || "",
+          attachmentMime,
+        });
+        if (file && res.attachmentError) {
+          toast(`Announcement posted, but the attachment wasn't saved: ${res.attachmentError}`);
+        } else if (file && !res.attachmentUrl) {
+          toast("Announcement posted, but the backend didn't save the attachment. Redeploy your Apps Script (Deploy > Manage deployments > Edit > New version).");
+        } else {
+          toast("Announcement posted");
+        }
+      } else {
+        const id = Math.max(0, ...DATA.announcements.map(a=>a.id)) + 1;
+        DATA.announcements.unshift({
+          id, date:"Just now", title: payload.title, category, desc: payload.desc, author: payload.author,
+          // no backend configured — attachment only lasts for this browser session
+          attachmentUrl: file ? URL.createObjectURL(file) : "", attachmentName: file ? file.name : "",
+          attachmentMime,
+        });
+        toast("Announcement posted");
+      }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+
     closeModals();
     $("#ann-new-form").reset();
+    const nameEl = $("#ann-attachment-name");
+    if (nameEl) nameEl.textContent = "";
     if(STATE.currentView === "announcements") renderAnnouncements();
   });
 
