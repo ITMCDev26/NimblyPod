@@ -472,6 +472,11 @@ canvas{ width:100%; display:block; }
 .case-history li{ display:flex; gap:10px; font-size:12.8px; margin-bottom:10px; }
 .case-actions-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
 
+/* Attachment viewer needs real room to preview a document, not the
+   480px width the rest of the modals use. */
+#modal-case-attachment{ max-width:760px; }
+@media (max-width:820px){ #modal-case-attachment{ max-width:96vw; } }
+
 /* ============================================================
    TOAST
    ============================================================ */
@@ -639,49 +644,3 @@ i[data-ic="archive"]::before{ content:"\1F5C4"; }
 @media (prefers-reduced-motion: reduce){
   *{ animation:none !important; transition:none !important; }
 }
-
-
-/* ============================================================
-   CASE REVIEW — inline attachment
-   ============================================================ */
-#modal-case{ max-width:760px; }
-.case-attachment{ border:1px solid var(--line); border-radius:var(--radius-md); padding:12px; margin:14px 0; background:var(--bg); }
-.case-attachment-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; font-size:13px; }
-.case-attachment-head strong{ overflow-wrap:anywhere; }
-.case-attachment-actions{ display:flex; gap:8px; align-items:center; }
-.case-attachment-preview.hidden{ display:none; }
-.case-attachment-empty{ font-size:12.8px; color:var(--ink-soft); margin:12px 0; }
-
-
-/* ============================================================
-   DEPARTMENT CASE FILES + COMPANY HANDBOOK
-   ============================================================ */
-#modal-casefile-new{ max-width:520px; }
-#modal-case-attachment{ max-width:900px; }
-.modal-wide{ max-width:980px; }
-.casefile-list{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-.casefile-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px; }
-.casefile-card h4{ font-size:15px; line-height:1.35; }
-.casefile-card p{ font-size:13px; color:var(--ink-soft); line-height:1.5; flex:1; overflow-wrap:anywhere; }
-.casefile-card .casefile-meta{ font-size:11.8px; color:var(--ink-soft); }
-.casefile-card .btn{ align-self:flex-start; }
-.dept-casefiles .panel-head{ align-items:center; gap:10px; flex-wrap:wrap; }
-.handbook-frame{ position:relative; height:72vh; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
-.handbook-frame iframe{ width:100%; height:100%; border:0; display:block; }
-/* sits over the viewer's pop-out icon so the doc can't be opened in Google Docs from here */
-.handbook-shield{ position:absolute; top:0; right:0; width:64px; height:56px; z-index:2; background:transparent; }
-
-/* ---- secure (view-only) PDF viewer ---- */
-#case-pdf-host, .handbook-frame{ position:relative; }
-#case-pdf-host{ height:68vh; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#eef1f0; }
-.handbook-frame{ background:#eef1f0; }
-.secure-pdf{ height:100%; overflow:auto; padding:12px; display:flex; flex-direction:column; align-items:center; gap:12px;
-  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
-.secure-pdf canvas{ display:block; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18); max-width:none; pointer-events:none; }
-.secure-pdf-msg{ height:100%; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:var(--ink-soft); font-size:14px; }
-.secure-pdf-msg.error{ color:#b3261e; }
-@media print{ #modal-overlay{ display:none !important; } }
-
-/* ---- multiple PDFs per case study ---- */
-.casefile-files{ display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
-.casefile-files .btn{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
